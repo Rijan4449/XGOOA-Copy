@@ -378,7 +378,7 @@
             fillColor: probColor(p)
           }).bindPopup(
             `<b>${feature?.properties?.name || "Location"}</b><br/>
-             Probability: <b>${(p * 100).toFixed(1)}%</b>`
+             Probability: <b>${p.toFixed(3)}</b>`
           );
         }
       }).addTo(map);
