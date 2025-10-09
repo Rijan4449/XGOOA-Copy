@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Invasion Risk Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Bootstrap / Icons / Fonts -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <!-- Your styles -->
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="stylesheet" href="../predict.css" />
+  <link rel="icon" href="../assets/logo.png" type="image/png" />
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Select2 (searchable dropdown) -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
+  <style>
+    body {
+      font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+    }
+
+    /* Normal (embedded) map */
+    #map {
+      min-height: 520px;
+      width: 100%;
+    }
+
+    /* Legend look */
+    .leaflet-control .legend-card {
+      background: #fff;
+      border-radius: .5rem;
+      box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, .1);
+      padding: .75rem;
+      font-size: .9rem;
+    }
+
+    .legend-swatch {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      margin-right: 6px;
+      border: 1px solid rgba(0, 0, 0, .15);
+      vertical-align: middle;
+    }
+
+    /* Slider label with live value */
+    .slider-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .slider-value {
+      font-weight: 600;
+      color: #0d3b66;
+      margin-left: 8px;
+    }
+
+    /* ---------- Fullscreen Overlay ---------- */
+    .map-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1050;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: none;
+    }
+
+    .map-overlay.show {
+      display: block;
+    }
+
+    .map-overlay-content {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      right: 24px;
+      bottom: 24px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .overlay-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(0, 0, 0, .06);
+    }
+
+    .overlay-title {
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .overlay-body {
+      flex: 1;
+    }
+
+    #mapExpanded {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Prevent body scroll when overlay is open */
+    body.no-scroll {
+      overflow: hidden;
+    }
+
+    /* Select2 look to match Bootstrap */
+    .select2-container .select2-selection--single {
+      height: 38px;
+      border-radius: .375rem;
+      border: 1px solid #ddd;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+      line-height: 36px;
+      padding-left: 12px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+      height: 36px;
+      right: 8px;
+    }
+  </style>
+</head>
+
+<body class="d-flex flex-column flex-md-row bg-light min-vh-100">
+  <!-- Sidebar -->
+  <div id="sidebar-container" class="flex-shrink-0"></div>
+
+  <!-- Main Content -->
+  <div class="flex-grow-1 px-3 px-md-4 py-3">
+    <div class="bg-brand p-2 rounded-2 text-white fs-6 mb-4">Invasion Risk Prediction</div>
+
+    <div class="row g-4">
+      <!-- Input Panel -->
+      <div class="col-12 col-md-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h5 class="mb-4">Risk Prediction Inputs</h5>
+            <form id="predict-form">
+              <!-- Temperature -->
+              <div class="slider-head">
+                <label for="temperature" class="mb-1">Temperature (°C)</label>
+                <span id="temperature_value" class="slider-value">0</span>
+              </div>
+              <div class="bg-brand rounded-4 p-2 px-3 mb-3">
+                <input type="range" id="temperature" class="form-range" min="0" max="50" step="0.1" value="0">
+              </div>
+
+              <!-- Water pH -->
+              <div class="slider-head">
+                <label for="water_ph" class="mb-1">Water pH</label>
+                <span id="water_ph_value" class="slider-value">0</span>
+              </div>
+              <div class="bg-brand rounded-4 p-2 px-3 mb-3">
+                <input type="range" id="water_ph" class="form-range" min="0" max="14" step="0.1" value="0">
+              </div>
+
+              <!-- Salinity -->
+              <div class="slider-head">
+                <label for="salinity" class="mb-1">Salinity (ppt)</label>
+                <span id="salinity_value" class="slider-value">0</span>
+              </div>
+              <div class="bg-brand rounded-4 p-2 px-3 mb-3">
+                <input type="range" id="salinity" class="form-range" min="0" max="50" step="0.1" value="0">
+              </div>
+
+              <!-- Dissolved Oxygen -->
+              <div class="slider-head">
+                <label for="dissolved_oxygen" class="mb-1">Dissolved Oxygen (mg/L)</label>
+                <span id="dissolved_oxygen_value" class="slider-value">0</span>
+              </div>
+              <div class="bg-brand rounded-4 p-2 px-3 mb-3">
+                <input type="range" id="dissolved_oxygen" class="form-range" min="0" max="20" step="0.1" value="0">
+              </div>
+
+              <!-- BOD -->
+              <div class="slider-head">
+                <label for="bod" class="mb-1">Biochemical Oxygen Demand (BOD) (mg/L)</label>
+                <span id="bod_value" class="slider-value">0</span>
+              </div>
+              <div class="bg-brand rounded-4 p-2 px-3 mb-3">
+                <input type="range" id="bod" class="form-range" min="0" max="10" step="0.1" value="0">
+              </div>
+
+              <!-- Turbidity -->
+              <div class="slider-head">
+                <label for="turbidity" class="mb-1">Turbidity (NTU)</label>
+                <span id="turbidity_value" class="slider-value">0</span>
+              </div>
+              <div class="bg-brand rounded-4 p-2 px-3 mb-3">
+                <input type="range" id="turbidity" class="form-range" min="0" max="250" step="1" value="0">
+              </div>
+
+              <!-- Species (Searchable from CSV) -->
+              <label for="specie">Species</label>
+              <select id="specie" class="form-select rounded-4 mb-5"></select>
+
+              <!-- Dynamic description panel -->
+              <div id="species-note" class="bg-brand text-white p-2 rounded-4 mb-3 mt-3" style="min-height: 54px;">
+                <em class="opacity-75">Select a species to see its description...</em>
+              </div>
+
+              <div class="d-flex justify-content-center mt-3">
+                <button type="submit" class="btn btn-brand2">Run Prediction</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel -->
+      <div class="col-12 col-md-8">
+        <div class="navbar-custom border-bottom bg-brand rounded-3 text-white mb-3 overflow-auto">
+          <ul class="nav justify-content-center flex-wrap">
+            <li class="nav-item"><a class="nav-link" href="Overview.html">Overview</a></li>
+            <li class="nav-item"><a class="nav-link active" href="predict.html">Invasion Risk Map</a></li>
+            <li class="nav-item"><a class="nav-link" href="interpretation.html">Interpretation (SHAP)</a></li>
+            <li class="nav-item"><a class="nav-link" href="risk_scores.html">Risk Scores</a></li>
+          </ul>
+        </div>
+
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-end mb-2">
+              <button id="expandBtn" class="btn btn-sm btn-primary">
+                <i class="bi bi-arrows-fullscreen me-1"></i> Expand Map
+              </button>
+            </div>
+            <div id="mapNormalContainer" class="rounded-4">
+              <div id="map" class="rounded"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen Overlay -->
+  <div id="mapOverlay" class="map-overlay" aria-hidden="true">
+    <div class="map-overlay-content">
+      <div class="overlay-header">
+        <h6 class="overlay-title mb-0">Invasion Risk Map (Fullscreen)</h6>
+        <div>
+          <button id="collapseBtn" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-x-lg me-1"></i> Collapse
+          </button>
+        </div>
+      </div>
+      <div class="overlay-body">
+        <div id="mapExpanded"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wait Modal -->
+  <div class="modal fade" id="predictWaitModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body d-flex align-items-center">
+          <div class="spinner-border me-3" role="status" aria-hidden="true"></div>
+          <div>
+            <h6 class="mb-0">Predicting fish invasiveness…</h6>
+            <small class="text-muted">Please wait</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- jQuery / Bootstrap JS / Select2 / Papa Parse -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="shared_state.js"></script>
+
+  <script>
+    // Sidebar
+    $("#sidebar-container").load("../includes/sidebar.html");
+
+    // External data (replace with the correct API later)
+    const API_BASE_URL = "http://localhost:5000/api";
+
+    // Safe empty fallback to avoid reference errors if fetch fails
+    const FALLBACK_FEATURES = {
+      "type": "FeatureCollection",
+      "features": []
+    };
+
+    // Map param mapping if needed to send query params to backend
+    const PARAM_MAP = {
+      temperature: "temp_c",
+      water_ph: "ph",
+      salinity: "sal_ppt",
+      dissolved_oxygen: "do_mgL",
+      bod: "bod_mgL",
+      turbidity: "turbidity_ntu",
+      specie: "species"
+    };
+
+    let map = null;
+    let pointsLayer = null;
+    const LUZON_BOUNDS = L.latLngBounds([11.0, 118.0], [20.8, 124.7]);
+
+    function initMap(targetId) {
+      if (map) { map.remove(); map = null; }
+
+      map = L.map(targetId, {
+        zoomControl: true,
+        maxBounds: LUZON_BOUNDS,
+        maxBoundsViscosity: 1.0
+      }).fitBounds(LUZON_BOUNDS);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+        minZoom: 6,
+        maxZoom: 18
+      }).addTo(map);
+
+      const legend = L.control({ position: "bottomright" });
+      legend.onAdd = function () {
+        const div = L.DomUtil.create("div", "legend-card");
+        div.innerHTML = "<strong>Invasion Risk Level</strong><br/>";
+        div.innerHTML += `
+          <span class="legend-swatch" style="background:#1a9850"></span>
+          Low (0.00–0.33)<br/>
+          <span class="legend-swatch" style="background:#fee08b"></span>
+          Medium (0.34–0.66)<br/>
+          <span class="legend-swatch" style="background:#d73027"></span>
+          High (0.67–1.00)<br/>
+        `;
+        return div;
+      };
+      legend.addTo(map);
+    }
+
+    function probColor(p) {
+      // Match the risk thresholds: Low < 0.34, Medium 0.34-0.67, High >= 0.67
+      return p >= 0.67 ? "#d73027" :  // High - Red
+        p >= 0.34 ? "#fee08b" :  // Medium - Yellow
+          "#1a9850";   // Low - Green
+    }
+
+    function renderPoints(geojson) {
+      if (!map) return;
+      if (pointsLayer) { map.removeLayer(pointsLayer); pointsLayer = null; }
+      pointsLayer = L.geoJSON(geojson, {
+        pointToLayer: (feature, latlng) => {
+          const p = feature?.properties?.prob ?? 0;
+          return L.circleMarker(latlng, {
+            radius: 8,
+            weight: 1,
+            color: "#333",
+            fillOpacity: 0.85,
+            fillColor: probColor(p)
+          }).bindPopup(
+            `<b>${feature?.properties?.name || "Location"}</b><br/>
+             Probability: <b>${(p * 100).toFixed(1)}%</b>`
+          );
+        }
+      }).addTo(map);
+    }
+
+    function buildQueryFromForm() {
+      const params = new URLSearchParams();
+      for (const [id, key] of Object.entries(PARAM_MAP)) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        params.set(key, id === "specie" ? el.value : Number(el.value));
+      }
+      return params.toString();
+    }
+
+    async function loadPoints({ useFormParams = false } = {}) {
+      try {
+        let url = `${API_BASE_URL}/geojson`;
+
+        if (useFormParams) {
+          // Get the scientific name from the selected option
+          const specieSelect = document.getElementById('specie');
+          const selectedOption = specieSelect.options[specieSelect.selectedIndex];
+          const speciesName = selectedOption ? selectedOption.getAttribute('data-sci') : '';
+
+          if (!speciesName) {
+            alert('Please select a species first!');
+            return;
+          }
+
+          const payload = {
+            species: speciesName,
+            temperature: parseFloat(document.getElementById('temperature').value),
+            ph: parseFloat(document.getElementById('water_ph').value),
+            salinity: parseFloat(document.getElementById('salinity').value),
+            dissolved_oxygen: parseFloat(document.getElementById('dissolved_oxygen').value),
+            bod: parseFloat(document.getElementById('bod').value),
+            turbidity: parseFloat(document.getElementById('turbidity').value)
+          };
+
+          console.log('Sending prediction request:', payload);
+
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log('Received prediction data:', data);
+          renderPoints(data);
+        }
+      } catch (err) {
+        console.error("Failed to load predictions:", err);
+        alert(`Error: ${err.message}\n\nMake sure the backend server is running on http://localhost:5000`);
+      }
+    }
+
+    $(document).ready(function () {
+      // Sliders live values
+      ["temperature", "water_ph", "salinity", "dissolved_oxygen", "bod", "turbidity"].forEach(id => {
+        const slider = document.getElementById(id);
+        const out = document.getElementById(id + "_value");
+        if (!slider || !out) return;
+        const update = () => { out.textContent = slider.value; };
+        update();
+        slider.addEventListener("input", update);
+      });
+
+      // Init map and points
+      initMap("map");
+      loadPoints();
+
+      // Wait modal around prediction
+      const waitModal = new bootstrap.Modal(document.getElementById('predictWaitModal'), {
+        backdrop: 'static', keyboard: false
+      });
+      document.getElementById("predict-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        waitModal.show();
+        try { await loadPoints({ useFormParams: true }); } finally { waitModal.hide(); }
+        setTimeout(() => waitModal.hide(), 2000);
+      });
+
+      // Fullscreen overlay controls
+      const overlay = document.getElementById("mapOverlay");
+      const expandBtn = document.getElementById("expandBtn");
+      const collapseBtn = document.getElementById("collapseBtn");
+
+      expandBtn?.addEventListener("click", () => {
+        const center = map ? map.getCenter() : null;
+        const zoom = map ? map.getZoom() : null;
+        overlay.classList.add("show");
+        document.body.classList.add("no-scroll");
+        initMap("mapExpanded");
+        if (center && zoom) map.setView(center, zoom);
+        loadPoints();
+        setTimeout(() => map.invalidateSize(), 200);
+      });
+
+      collapseBtn?.addEventListener("click", () => {
+        const center = map ? map.getCenter() : null;
+        const zoom = map ? map.getZoom() : null;
+        overlay.classList.remove("show");
+        document.body.classList.remove("no-scroll");
+        initMap("map");
+        if (center && zoom) map.setView(center, zoom);
+        loadPoints();
+        setTimeout(() => map.invalidateSize(), 200);
+      });
+
+      // ======================
+      // Species CSV integration
+      // ======================
+      const CSV_URL = "../assets/fish_description.csv";
+      const $specie = $('#specie');
+      const noteEl = document.getElementById("species-note");
+
+      function renderDescription(d) {
+        if (!d) {
+          noteEl.innerHTML = `<em class="opacity-75">Select a species to see its description...</em>`;
+          return;
+        }
+        const common = d.commonName ? `<strong>${d.commonName}</strong>` : `<strong>Unknown common name</strong>`;
+        const sci = d.sciName ? `<em>${d.sciName}</em>` : '';
+        const desc = d.description || 'No description provided.';
+        noteEl.innerHTML = `
+          <div>${common} ${sci ? `(${sci})` : ''}</div>
+          <div class="mt-1">${desc}</div>
+        `;
+      }
+
+      Papa.parse(CSV_URL, {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function (results) {
+          // Build options from CSV
+          const items = (results?.data || [])
+            .map((r, idx) => ({
+              sciName: (r["Species"] || "").toString().trim(),
+              commonName: (r["CommonName"] || "").toString().trim(),
+              description: (r["Description"] || "").toString().trim(),
+              idx
+            }))
+            .filter(r => r.sciName || r.commonName);
+
+          // Always include a blank placeholder
+          $specie.empty().append(`<option></option>`);
+
+          // Fallback if CSV is missing/empty
+          if (!items.length) {
+            const fb = { commonName: "Clown Knife Fish", sciName: "Chitala ornata", description: "Adaptable, predatory; potential risk to native and economic species." };
+            $specie.append(
+              $(`<option></option>`)
+                .val("fallback_0")
+                .text(`${fb.commonName} (${fb.sciName})`)
+                .attr("data-common", fb.commonName)
+                .attr("data-sci", fb.sciName)
+                .attr("data-desc", fb.description)
+            );
+          } else {
+            items.forEach(it => {
+              const label = it.commonName ? `${it.commonName} (${it.sciName})` : it.sciName;
+              $specie.append(
+                $(`<option></option>`)
+                  .val(`row_${it.idx}`)
+                  .text(label)
+                  .attr("data-common", it.commonName)
+                  .attr("data-sci", it.sciName)
+                  .attr("data-desc", it.description)
+              );
+            });
+          }
+
+          // Initialize Select2 with the same templates as interpretation.html
+          $specie.select2({
+            placeholder: "Select a species",
+            allowClear: true,
+            width: '100%',
+            templateResult: function (option) {
+              if (!option.id) return option.text;
+              const $el = $(option.element);
+              const common = $el.data("common") || "";
+              const sci = $el.data("sci") || "";
+              return $(`
+                <div>
+                  <div class="fw-semibold">${common || "(No common name)"}</div>
+                  <div class="text-muted small"><i>${sci}</i></div>
+                </div>
+              `);
+            },
+            templateSelection: function (option) {
+              if (!option.id) return option.text || "";
+              const $el = $(option.element);
+              const common = $el.data("common") || "(No common name)";
+              const sci = $el.data("sci") || "";
+              // IMPORTANT: return plain text so it shows in the field
+              return `${common}${sci ? ` (${sci})` : ""}`;
+            }
+          });
+
+          // Update description on change
+          $specie.on("change", function () {
+            const opt = this.selectedOptions && this.selectedOptions[0];
+            if (!opt) return renderDescription(null);
+            renderDescription({
+              commonName: opt.getAttribute("data-common"),
+              sciName: opt.getAttribute("data-sci"),
+              description: opt.getAttribute("data-desc")
+            });
+          });
+
+          // Start with placeholder description
+          renderDescription(null);
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,969 @@
+.bg-brand { background-color: #0c3970 !important; }
+
+.text-brand { color: #0c3970 !important; }
+.text-brand2 { color: #2bc1d8 !important; }
+
+.btn-brand {
+    background-color: #0c3970 !important;
+    border-color: #0c3970 !important;
+    color: #fff !important;
+}
+
+.btn-brand2 {
+    background-color: #2bc1d8 !important;
+    border-color: #2bc1d8 !important;
+    color: #fff !important;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+.logo-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Style the track */
+.form-range::-webkit-slider-runnable-track {
+background: #2bc1d8;
+height: 0.5rem;
+border-radius: 1rem;
+}
+.form-range::-moz-range-track {
+background: #2bc1d8;
+height: 0.5rem;
+border-radius: 1rem;
+}
+
+/* Style the thumb */
+.form-range::-webkit-slider-thumb {
+background: #fff;
+border: 2px solid #2bc1d8;
+width: 1rem;
+height: 1rem;
+border-radius: 50%;
+margin-top: -0.25rem; /* centers the thumb */
+appearance: none;
+}
+.form-range::-moz-range-thumb {
+background: #fff;
+border: 2px solid var(--bs-secondary);
+width: 1rem;
+height: 1rem;
+border-radius: 50%;
+}
+
+/* Remove default link look */
+.navbar-custom .nav-link {
+color: #ffffff;           /* dark text */
+font-weight: 500;
+position: relative;
+padding: 0.5rem 1rem;
+text-decoration: none;
+border: none;             /* no borders */
+}
+
+/* Underline effect */
+.navbar-custom .nav-link::after {
+content: '';
+display: block;
+height: 3px;
+width: 0;
+background:  #2bc1d8; /* brand underline */
+transition: width 0.3s;
+margin: 0 auto;
+border-radius: 2px;
+}
+
+/* Expand underline on hover/active */
+.navbar-custom .nav-link:hover::after,
+.navbar-custom .nav-link.active::after {
+width: 100%;
+}
+
+.table thead th {
+  background-color: #0c3970; /* or your brand color */
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.5px;      /* optional */
+  padding: 12px;
+  border-bottom: none;        /* cleaner look */
+}
+
+/* Additional CSS for Exports Page - Add to your existing style.css */
+
+/* Exports Table Container */
+.exports-table-container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+/* Exports Table */
+.exports-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.2s ease;
+}
+
+.exports-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.exports-table td {
+    padding: 15px 12px;
+    vertical-align: middle;
+    border: none;
+}
+
+.exports-table th {
+    padding: 15px 12px;
+}
+
+/* Checkbox Styling */
+.form-check-input {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #0c3970;
+    border-radius: 3px;
+}
+
+.form-check-input:checked {
+    background-color: #0c3970;
+    border-color: #0c3970;
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(12, 57, 112, 0.25);
+}
+
+/* Status Badges */
+.badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-active {
+    background-color: #28a745 !important;
+    color: white;
+}
+
+.status-inactive {
+    background-color: #dc3545 !important;
+    color: white;
+}
+
+/* Save/Saved Buttons */
+.save-btn {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 16px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.saved-btn {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 16px;
+    border-radius: 6px;
+    background-color: #6c757d !important;
+    border-color: #6c757d !important;
+    color: white !important;
+    cursor: not-allowed;
+}
+
+.saved-btn:hover {
+    background-color: #6c757d !important;
+    border-color: #6c757d !important;
+}
+
+/* Table Header for Exports */
+.exports-table .table-header {
+    background-color: #0c3970;
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.exports-table .table-header th {
+    border: none;
+    padding: 15px 12px;
+    font-size: 14px;
+    border-bottom: none;
+}
+
+/* End Result */
+.end-result {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    padding: 20px;
+    background: white;
+    border-top: 1px solid #f1f5f9;
+    font-size: 14px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .exports-table-container {
+        margin: 10px;
+        border-radius: 10px;
+    }
+    
+    .exports-table td,
+    .exports-table th {
+        padding: 10px 8px;
+        font-size: 13px;
+    }
+    
+    .badge {
+        font-size: 10px;
+        padding: 4px 8px;
+    }
+    
+    .save-btn,
+    .saved-btn {
+        font-size: 11px;
+        padding: 4px 12px;
+    }
+}
+
+/* Additional CSS for Reports V2 - Add to your existing style.css */
+
+/* Search Container */
+.search-container {
+    position: relative;
+}
+
+.search-input {
+    border-radius: 8px;
+    padding: 10px 15px 10px 40px;
+    border: 1px solid #dee2e6;
+    font-size: 14px;
+    width: 100%;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-input:focus {
+    border-color: #0c3970;
+    box-shadow: 0 0 0 0.2rem rgba(12, 57, 112, 0.15);
+    outline: none;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    z-index: 10;
+    font-size: 16px;
+}
+
+/* White Background Filters Button */
+.filters-btn-white {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #495057;
+    border-radius: 8px;
+    padding: 10px 20px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.filters-btn-white:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+    color: #495057;
+}
+
+.filters-btn-white:focus {
+    box-shadow: 0 0 0 0.2rem rgba(12, 57, 112, 0.15);
+}
+
+/* Reports Table Container */
+.reports-table-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+/* Reports Table */
+.reports-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.2s ease;
+}
+
+.reports-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.reports-table td {
+    padding: 16px 15px;
+    vertical-align: middle;
+    border: none;
+    font-size: 14px;
+}
+
+.reports-table th {
+    padding: 16px 15px;
+    font-size: 14px;
+}
+
+/* Table Header */
+.table-header {
+    background-color: #0c3970;
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.table-header th {
+    border: none;
+    border-bottom: none;
+}
+
+/* Action Buttons */
+.open-btn {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.open-btn:hover {
+    background-color: #0a2d5a !important;
+    transform: translateY(-1px);
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    color: #dc3545;
+    font-size: 16px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* End Result */
+.end-result {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    padding: 20px;
+    background: white;
+    border-top: 1px solid #f1f5f9;
+    font-size: 14px;
+}
+
+/* Search and Filter Section */
+.bg-white {
+    background-color: white !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .search-input {
+        margin-bottom: 15px;
+    }
+    
+    .filters-btn-white {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .reports-table td,
+    .reports-table th {
+        padding: 12px 10px;
+        font-size: 13px;
+    }
+    
+    .open-btn {
+        font-size: 11px;
+        padding: 4px 10px;
+    }
+    
+    .delete-btn {
+        font-size: 14px;
+        padding: 4px 6px;
+    }
+}
+
+/* Additional hover effects */
+.reports-table tbody tr:hover .open-btn {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(12, 57, 112, 0.2);
+}
+
+.reports-table tbody tr:hover .delete-btn {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+}
+
+/* Settings Sections */
+.settings-section {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
+}
+
+.section-title {
+    color: #0c3970;
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f8f9fa;
+}
+
+/* Setting Items */
+.setting-item {
+    padding: 8px 0;
+}
+
+.setting-item .form-label {
+    color: #495057;
+    font-weight: 500;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+/* Custom Select Styling */
+.settings-select {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+}
+
+.settings-select:focus {
+    border-color: #0c3970;
+    box-shadow: 0 0 0 0.2rem rgba(12, 57, 112, 0.15);
+    background-color: white;
+}
+
+/* Custom Toggle Switches */
+.form-switch .form-check-input {
+    width: 48px;
+    height: 24px;
+    border-radius: 12px;
+    background-color: #dee2e6;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.form-switch .form-check-input:checked {
+    background-color: #0c3970;
+    border-color: #0c3970;
+}
+
+.form-switch .form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(12, 57, 112, 0.15);
+}
+
+/* Zoom Container */
+.zoom-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.zoom-label {
+    font-size: 12px;
+    color: #6c757d;
+    font-weight: 500;
+    min-width: 35px;
+    text-align: center;
+}
+
+/* Custom Range Slider */
+.form-range {
+    flex: 1;
+    height: 6px;
+    background: transparent;
+    border: none;
+    outline: none;
+}
+
+.form-range::-webkit-slider-track {
+    background: #2bc1d8;
+    height: 6px;
+    border-radius: 3px;
+}
+
+.form-range::-moz-range-track {
+    background: #2bc1d8;
+    height: 6px;
+    border-radius: 3px;
+    border: none;
+}
+
+.form-range::-webkit-slider-thumb {
+    background: #fff;
+    border: 2px solid #2bc1d8;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-top: -7px;
+    appearance: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.form-range::-moz-range-thumb {
+    background: #fff;
+    border: 2px solid #2bc1d8;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.form-range::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 4px rgba(43, 193, 216, 0.2);
+}
+
+/* Settings Links */
+.settings-link {
+    color: #0c3970;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    padding: 8px 0;
+    display: block;
+    transition: all 0.2s ease;
+}
+
+.settings-link:hover {
+    color: #0a2d5a;
+    text-decoration: none;
+    padding-left: 8px;
+}
+
+.settings-link.text-danger {
+    color: #dc3545 !important;
+}
+
+.settings-link.text-danger:hover {
+    color: #b02a37 !important;
+}
+
+/* Return Button */
+.btn-outline-primary {
+    border-color: #0c3970;
+    color: #0c3970;
+    font-weight: 500;
+    padding: 8px 20px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-outline-primary:hover {
+    background-color: #0c3970;
+    border-color: #0c3970;
+    color: white;
+}
+
+/* Advanced Controls Title */
+h4.fw-bold {
+    color: #212529;
+    margin-bottom: 24px;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .settings-section {
+        margin-bottom: 24px;
+        padding: 16px;
+    }
+    
+    .section-title {
+        font-size: 15px;
+    }
+    
+    .setting-item .form-label {
+        font-size: 13px;
+    }
+    
+    .settings-select {
+        font-size: 13px;
+        padding: 6px 10px;
+    }
+    
+    .settings-link {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 576px) {
+    .zoom-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    
+    .zoom-label {
+        min-width: auto;
+    }
+    
+    .form-range {
+        margin: 8px 0;
+    }
+    
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 8px;
+    }
+    
+    .form-switch {
+        align-self: flex-end;
+    }
+}
+
+/* Smooth transitions for all interactive elements */
+.settings-section * {
+    transition: all 0.2s ease;
+}
+
+/* Focus indicators for accessibility */
+.settings-link:focus,
+.form-select:focus,
+.form-check-input:focus,
+.form-range:focus {
+    outline: 2px solid #0c3970;
+    outline-offset: 2px;
+}
+
+.sidebar h4 {
+    color: white !important;
+}
+
+/* Sidebar width and appearance */
+#sidebar-container {
+  width: 200px;
+  min-width: 200px;
+  background-color: #0c3970;
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  overflow: hidden; /* keeps radius clean */
+}
+
+@media (max-width: 992px) {
+  #sidebar-container {
+    width: 180px;
+    min-width: 180px;
+  }
+}
+
+@media (max-width: 768px) {
+  #sidebar-container {
+    display: none; /* can be toggled later for mobile */
+  }
+}
+
+/* Trash Table Container */
+.trash-table-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+/* Trash Table */
+.trash-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.2s ease;
+}
+
+.trash-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.trash-table td {
+    padding: 16px 12px;
+    vertical-align: middle;
+    border: none;
+    font-size: 14px;
+}
+
+.trash-table th {
+    padding: 16px 12px;
+    font-size: 14px;
+}
+
+/* File Icons and Names */
+.trash-table .bi-file-earmark-pdf {
+    color: #dc3545 !important;
+    font-size: 18px;
+}
+
+.trash-table .bi-file-earmark-excel {
+    color: #28a745 !important;
+    font-size: 18px;
+}
+
+.trash-table .bi-image {
+    color: #007bff !important;
+    font-size: 18px;
+}
+
+.trash-table span {
+    font-weight: 500;
+    color: #495057;
+}
+
+/* Action Buttons */
+.restore-btn {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.restore-btn:hover {
+    background-color: #218838 !important;
+    transform: translateY(-1px);
+}
+
+.delete-btn {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+    color: white !important;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+    background-color: #c82333 !important;
+    transform: translateY(-1px);
+}
+
+/* Bulk Actions */
+.bulk-actions {
+    background-color: #f8f9fa !important;
+    border-top: 1px solid #dee2e6 !important;
+}
+
+#bulkRestoreBtn {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+}
+
+#bulkRestoreBtn:hover:not(:disabled) {
+    background-color: #218838 !important;
+}
+
+#bulkDeleteBtn {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+}
+
+#bulkDeleteBtn:hover:not(:disabled) {
+    background-color: #c82333 !important;
+}
+
+#bulkRestoreBtn:disabled,
+#bulkDeleteBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Empty Trash Button */
+.btn-outline-light {
+    border-color: rgba(255, 255, 255, 0.5) !important;
+    color: white !important;
+    transition: all 0.2s ease;
+}
+
+.btn-outline-light:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: white !important;
+    color: white !important;
+}
+
+/* Checkboxes */
+.form-check-input {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #0c3970;
+    border-radius: 3px;
+}
+
+.form-check-input:checked {
+    background-color: #0c3970;
+    border-color: #0c3970;
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(12, 57, 112, 0.25);
+}
+
+.form-check-input:indeterminate {
+    background-color: #0c3970;
+    border-color: #0c3970;
+}
+
+/* Type Badges */
+.badge.bg-light {
+    background-color: #e9ecef !important;
+    color: #495057 !important;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 8px;
+}
+
+/* Search Container (reuse from other pages) */
+.search-container {
+    position: relative;
+}
+
+.search-input {
+    border-radius: 8px;
+    padding: 10px 15px 10px 40px;
+    border: 1px solid #dee2e6;
+    font-size: 14px;
+    width: 100%;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-input:focus {
+    border-color: #0c3970;
+    box-shadow: 0 0 0 0.2rem rgba(12, 57, 112, 0.15);
+    outline: none;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    z-index: 10;
+    font-size: 16px;
+}
+
+/* Filters Button */
+.filters-btn-white {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #495057;
+    border-radius: 8px;
+    padding: 10px 20px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.filters-btn-white:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+    color: #495057;
+}
+
+/* End Result Section */
+.end-result {
+    text-align: center;
+    color: #6c757d;
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Toast Notifications */
+.alert.position-fixed {
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .trash-table td,
+    .trash-table th {
+        padding: 12px 8px;
+        font-size: 13px;
+    }
+    
+    .restore-btn,
+    .delete-btn {
+        font-size: 11px;
+        padding: 3px 6px;
+    }
+    
+    .bulk-actions {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .bulk-actions .d-flex {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .btn-outline-light {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+    
+    .search-input {
+        margin-bottom: 15px;
+    }
+    
+    .filters-btn-white {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Row hover effects */
+.trash-table tbody tr:hover .restore-btn,
+.trash-table tbody tr:hover .delete-btn {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Selected count styling */
+#selectedCount {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+/* Icon consistency */
+.bi {
+    vertical-align: -2px;
+}

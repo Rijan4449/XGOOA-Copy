@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>XGOOA | Prediction Model</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="icon" href="../assets/logo.png" type="image/png">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: #000;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* HEADER LOGO */
+    header {
+      position: absolute;
+      top: 30px;
+      left: 60px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    header img {
+      height: 48px;
+      width: 52px;
+    }
+
+    header h5 {
+      font-weight: 600;
+      margin: 0;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+
+    /* HERO SECTION */
+    .hero {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .hero video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(70%);
+    }
+
+    .overlay {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      text-align: left;
+      background: rgba(0, 0, 0, 0.45);
+      padding: 120px 100px;
+    }
+
+    .overlay h1 {
+      font-weight: 700;
+      font-size: 3.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .overlay h4 {
+      font-weight: 500;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: #cfd9ff;
+    }
+
+    .overlay p {
+      max-width: 800px;
+      margin-bottom: 2rem;
+      line-height: 1.7;
+      font-size: 1.05rem;
+      color: #e6e6e6;
+    }
+
+    .btn-brand {
+      background-color: #0b3d91;
+      color: #fff;
+      border-radius: 50px;
+      padding: 12px 36px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      font-size: 1rem;
+      box-shadow: 0 4px 12px rgba(11, 61, 145, 0.3);
+    }
+
+    .btn-brand:hover {
+      background-color: #082c6c;
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(11, 61, 145, 0.4);
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .overlay {
+        padding: 100px 50px;
+      }
+      .overlay h1 {
+        font-size: 3rem;
+      }
+      .overlay h4 {
+        font-size: 1.25rem;
+      }
+      .overlay p {
+        font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      header {
+        top: 20px;
+        left: 25px;
+      }
+      .overlay {
+        padding: 80px 25px;
+        align-items: center;
+        text-align: center;
+      }
+      .overlay h1 {
+        font-size: 2.3rem;
+      }
+      .overlay p {
+        font-size: 0.95rem;
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER LOGO -->
+  <header>
+    <img src="assets/logo.png" alt="XGOOA Logo">
+    <h5>XGOOA</h5>
+  </header>
+
+  <!-- HERO VIDEO -->
+  <section class="hero">
+    <video autoplay muted loop playsinline>
+      <source src="assets/landing video.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+
+    <div class="overlay">
+      <h1>XGOOA</h1>
+      <h4>Prediction Model</h4>
+      <p>
+        XGOOA Prediction Model is a system designed to predict the possible invasion of freshwater fish species 
+        in lakes across Luzon, Philippines. Using advanced machine learning powered by XGBoost and the Modified Osprey Optimization 
+        Algorithm (MOOA), the system analyzes environmental and biological data such as water temperature, pH, turbidity, and fish traits 
+        to assess invasion risks.
+      </p>
+      <a href="mains/dashboard.html" class="btn-brand">Get Started</a>
+    </div>
+  </section>
+
+</body>
+</html>
