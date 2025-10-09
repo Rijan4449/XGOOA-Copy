@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="icon" href="../assets/logo.png" type="image/png">
+</head>
+<body class="d-flex bg-light vh-100">
+    <div id="sidebar-container"></div>
+
+    <div class="flex-grow-1 px-4 py-2">
+        <div class="bg-brand p-2 rounded-2 text-white fs-6">Dashboard</div>
+        <div class="row m-2 py-4">
+            <div class="col">
+                <h1 class="pb-0 mb-0">Good morning, User!</h1>
+                <span class="fst-italic fw-lighter">Here are today's results</span>
+            </div>
+            <div class="col text-end d-flex align-items-end justify-content-end">
+                <div class="d-flex align-items-center">
+                    <span>21 Apr 2025, Monday</span>
+                    <i class="bi bi-person-fill fs-2 ms-2" style="cursor:pointer;"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-brand mb-3 ps-4 p-2 rounded-2 text-white fs-4">Analytics Overview</div>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col d-flex justify-content-center">
+                        <!-- Pie Chart Canvas -->
+                        <div style="width:300px; height:300px;">
+                            <canvas id="riskChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div id="lakesBlock" class="m-2 p-4 text-center border rounded-2 bg-brand text-light" style="cursor:pointer;">
+                            <h1 id="lakesCount">0</h1>
+                            <span>Lakes Analyzed</span>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div id="highRiskBlock" class="m-2 p-4 text-center border rounded-2 bg-brand text-light" style="cursor:pointer;">
+                            <h1 id="highRiskCount">0</h1>
+                            <span>Highest Risk Species</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-8">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <p class="fs-4">Recent Activity</p>
+                            <a class="btn text-brand" href="reports.html">See All</a>
+                        </div>
+                        <div>
+                            <table class="table table-striped" id="recentActivity">
+                                <tbody>
+                                    <!-- Will populate dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <p>Most Invasive This week</p>
+                        <table class="table table-striped">
+                            <tr>
+                                <td>Bluegill</td>
+                                <td>0.85</td>
+                            </tr>
+                            <tr>
+                                <td>Mexican mojorra</td>
+                                <td>0.85</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Profile Modal -->
+    <div class="modal fade" id="userProfileModal" tabindex="-1" aria-labelledby="userProfileModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="userProfileModalLabel">User Profile</h5>
+            <button type="button" class="btn-close" style="filter: invert(21%) sepia(83%) saturate(5863%) hue-rotate(187deg) brightness(94%) contrast(95%);" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p><strong>Name:</strong> <span id="profileName">Loading...</span></p>
+            <p><strong>Email:</strong> <span id="profileEmail">Loading...</span></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn" style="background-color:#0C3970; color:white;" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $("#sidebar-container").load("../includes/sidebar.html");
+
+        // Dummy user info (replace with backend data)
+        const currentUser = {
+            name: "Alan Gilles",
+            email: "alan@example.com"
+        };
+
+        // Show modal on user icon click
+        document.querySelector('.bi-person-fill').addEventListener('click', () => {
+            document.getElementById('profileName').textContent = currentUser.name;
+            document.getElementById('profileEmail').textContent = currentUser.email;
+            const userModal = new bootstrap.Modal(document.getElementById('userProfileModal'));
+            userModal.show();
+        });
+
+        // Fetch reports.html and read Risk Level dynamically
+        $.get('reports.html', function(data) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(data, 'text/html');
+            const rows = doc.querySelectorAll('.reports-table tbody tr');
+
+            let invasiveCount = 0, potentiallyInvasiveCount = 0, nonInvasiveCount = 0;
+
+            // Populate Recent Activity (max 3 rows)
+            const tbody = document.getElementById('recentActivity').querySelector('tbody');
+            tbody.innerHTML = '';
+            rows.forEach((row, index) => {
+                const species = row.cells[1]?.textContent || '';
+                const riskLevel = row.cells[3]?.textContent?.trim() || ''; // Risk Level column (4th column)
+                
+                // Count for pie chart
+                const riskLevelLower = riskLevel.toLowerCase();
+                if (riskLevelLower === 'invasive') invasiveCount++;
+                else if (riskLevelLower === 'potentially invasive') potentiallyInvasiveCount++;
+                else if (riskLevelLower === 'non-invasive') nonInvasiveCount++;
+
+                // Only show first 3 in Recent Activity
+                if(index < 3){
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row.cells[0]?.textContent || ''}</td>
+                        <td>${species}</td>
+                        <td>${riskLevel}</td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            });
+
+            // Update counts for blocks
+            document.getElementById('lakesCount').textContent = rows.length;
+            document.getElementById('highRiskCount').textContent = invasiveCount;
+
+            // Clickable blocks
+            document.getElementById('lakesBlock').onclick = () => window.location.href = 'reports.html?filter=lakes';
+            document.getElementById('highRiskBlock').onclick = () => window.location.href = 'reports.html?filter=highrisk';
+
+            // Render Pie Chart
+            const ctx = document.getElementById('riskChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Invasive', 'Potentially Invasive', 'Non-Invasive'],
+                    datasets: [{
+                        data: [invasiveCount, potentiallyInvasiveCount, nonInvasiveCount],
+                        backgroundColor: ['#ff0000','#ff7700','#00E50B']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        title: { display: true, text: 'Species Risk Levels' }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
