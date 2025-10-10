@@ -405,7 +405,14 @@
             renderDescription(d);
           });
 
-          renderDescription(null);
+          // Restore saved species selection
+          SharedState.restoreSpeciesSelection($specie);
+
+          // Auto-load previous prediction if available
+          if (SharedState.hasPredictionData()) {
+            console.log('Previous prediction data found, auto-loading risk scores...');
+            setTimeout(() => loadRiskScores(), 500);
+          }
         },
         error: function (err) {
           console.error("Papa error:", err);

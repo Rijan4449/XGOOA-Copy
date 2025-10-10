@@ -435,6 +435,10 @@
 
           const data = await response.json();
           console.log('Received prediction data:', data);
+          
+          // Save prediction results to localStorage
+          SharedState.savePredictionResults(data);
+          
           renderPoints(data);
         }
       } catch (err) {
@@ -598,8 +602,15 @@
             });
           });
 
-          // Start with placeholder description
-          renderDescription(null);
+          // Restore saved species selection
+          SharedState.restoreSpeciesSelection($specie);
+
+          // Auto-load previous prediction if available
+          const savedPrediction = SharedState.loadPredictionResults();
+          if (savedPrediction && SharedState.hasPredictionData()) {
+            console.log('Previous prediction data found, auto-loading map...');
+            renderPoints(savedPrediction);
+          }
         }
       });
     });
