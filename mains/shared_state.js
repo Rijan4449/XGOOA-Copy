@@ -40,14 +40,14 @@ const SharedState = {
     loadFormInputs: function() {
         const saved = localStorage.getItem('xgooa_form_state');
         if (!saved) {
-            // Return default values
+            // Return default values - ALL SLIDERS START AT ZERO
             return {
-                temperature: '27',
-                water_ph: '7.5',
-                salinity: '0.5',
-                dissolved_oxygen: '6',
-                bod: '2',
-                turbidity: '10',
+                temperature: '0',
+                water_ph: '0',
+                salinity: '0',
+                dissolved_oxygen: '0',
+                bod: '0',
+                turbidity: '0',
                 specie_value: '',
                 specie_sci: '',
                 specie_common: '',
@@ -143,6 +143,211 @@ const SharedState = {
         localStorage.removeItem('xgooa_form_state');
         localStorage.removeItem('xgooa_prediction_results');
         console.log('All state cleared');
+    },
+
+    // Reset form to default values and clear all data
+    reset: function() {
+        console.log('Starting reset process...');
+        
+        // Clear localStorage FIRST
+        this.clear();
+        
+        // Reset all sliders to ZERO
+        const defaults = {
+            temperature: '0',
+            water_ph: '0',
+            salinity: '0',
+            dissolved_oxygen: '0',
+            bod: '0',
+            turbidity: '0'
+        };
+        
+        // Reset each slider with proper event triggering
+        Object.keys(defaults).forEach(id => {
+            const slider = document.getElementById(id);
+            const display = document.getElementById(id + '_value');
+            
+            if (slider) {
+                // Set the value to ZERO
+                slider.value = defaults[id];
+                
+                // Update display to show ZERO
+                if (display) {
+                    display.textContent = defaults[id];
+                }
+                
+                // Trigger input event to ensure any listeners are notified
+                const inputEvent = new Event('input', { bubbles: true });
+                slider.dispatchEvent(inputEvent);
+                
+                // Trigger change event as well
+                const changeEvent = new Event('change', { bubbles: true });
+                slider.dispatchEvent(changeEvent);
+                
+                console.log(`Reset ${id} to ${defaults[id]}`);
+            } else {
+                console.warn(`Slider not found: ${id}`);
+            }
+        });
+        
+        // Reset species dropdown (using jQuery if available)
+        const specieSelect = document.getElementById('specie');
+        if (specieSelect) {
+            if (typeof $ !== 'undefined' && $(specieSelect).data('select2')) {
+                $(specieSelect).val(null).trigger('change');
+            } else {
+                specieSelect.selectedIndex = 0;
+            }
+        }
+        
+        // Reset species description
+        const noteEl = document.getElementById('species-note');
+        if (noteEl) {
+            noteEl.innerHTML = '<em class="opacity-75">Select a species to see its description...</em>';
+        }
+        
+        console.log('Form reset to ZERO - complete');
+        return true;
+    },
+
+    // Show confirmation dialog and reset if confirmed
+    confirmAndReset: function() {
+        const confirmed = confirm(
+            'Are you sure you want to start a new prediction?\n\n' +
+            'This will clear all current inputs and results.'
+        );
+        
+        if (confirmed) {
+            console.log('User confirmed reset');
+            
+            // Step 1: Clear localStorage FIRST and wait for it to complete
+            this.clear();
+            
+            // Step 2: Force localStorage to flush by reading it back
+            const verifyCleared = localStorage.getItem('xgooa_form_state');
+            console.log('Verification - localStorage cleared:', verifyCleared === null);
+            
+            // Step 3: Reset form visually (sliders, dropdowns, etc.)
+            this.resetFormVisuals();
+            
+            // Step 4: Show success notification
+            this.showResetNotification();
+            
+            // Step 5: Wait longer before reload to ensure everything is processed
+            // This gives time for:
+            // - localStorage to fully clear
+            // - Visual updates to complete
+            // - Notification to display
+            // - Browser to process all changes
+            setTimeout(() => {
+                console.log('Reloading page after reset...');
+                // Use location.reload() with true to force reload from server
+                window.location.reload(true);
+            }, 1200); // Increased from 800ms to 1200ms for better reliability
+        }
+        
+        return confirmed;
+    },
+
+    // Reset form visuals without clearing localStorage (used internally)
+    resetFormVisuals: function() {
+        console.log('Resetting form visuals to ZERO...');
+        
+        // Reset all sliders to ZERO
+        const defaults = {
+            temperature: '0',
+            water_ph: '0',
+            salinity: '0',
+            dissolved_oxygen: '0',
+            bod: '0',
+            turbidity: '0'
+        };
+        
+        // Reset each slider with proper event triggering
+        Object.keys(defaults).forEach(id => {
+            const slider = document.getElementById(id);
+            const display = document.getElementById(id + '_value');
+            
+            if (slider) {
+                // Set the value to ZERO
+                slider.value = defaults[id];
+                
+                // Update display to show ZERO
+                if (display) {
+                    display.textContent = defaults[id];
+                }
+                
+                // Trigger input event to ensure any listeners are notified
+                const inputEvent = new Event('input', { bubbles: true });
+                slider.dispatchEvent(inputEvent);
+                
+                // Trigger change event as well
+                const changeEvent = new Event('change', { bubbles: true });
+                slider.dispatchEvent(changeEvent);
+                
+                console.log(`Visual reset: ${id} = ${defaults[id]}`);
+            }
+        });
+        
+        // Reset species dropdown
+        const specieSelect = document.getElementById('specie');
+        if (specieSelect) {
+            if (typeof $ !== 'undefined' && $(specieSelect).data('select2')) {
+                $(specieSelect).val(null).trigger('change');
+            } else {
+                specieSelect.selectedIndex = 0;
+            }
+        }
+        
+        // Reset species description
+        const noteEl = document.getElementById('species-note');
+        if (noteEl) {
+            noteEl.innerHTML = '<em class="opacity-75">Select a species to see its description...</em>';
+        }
+        
+        console.log('Form visuals reset to ZERO - complete');
+    },
+
+    // Show temporary success notification
+    showResetNotification: function() {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = 'reset-notification';
+        notification.innerHTML = `
+            <i class="bi bi-check-circle-fill me-2"></i>
+            Form reset successfully! Starting fresh...
+        `;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 9999;
+            font-weight: 500;
+            animation: slideIn 0.3s ease-out;
+        `;
+        
+        // Add animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(400px); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        document.body.appendChild(notification);
+        
+        // Remove after delay
+        setTimeout(() => {
+            notification.style.animation = 'slideIn 0.3s ease-out reverse';
+            setTimeout(() => notification.remove(), 300);
+        }, 500);
     }
 };
 
