@@ -508,45 +508,50 @@
 
           function displayFeatureImportance(data) {
             const container = document.getElementById('feature-importance-container');
-            let html = '<div class="mb-4">';
-            html += '<h5 class="mb-3">Aggregated Feature Importance by Environmental Parameter</h5>';
-            html += '<div class="table-responsive">';
-            html += '<table class="table table-striped">';
-            html += '<thead><tr><th>Parameter</th><th>Percentage</th></tr></thead>';
-            html += '<tbody>';
+            let html = `
+            <div class="mb-4">
+              <h5 class="mb-3">Aggregated Feature Importance by Environmental Parameter</h5>
+              <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                  <thead>
+                    <tr>
+                      <th style="width: 35%;">Parameter</th>
+                      <th style="width: 65%;">Percentage</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+          `;
 
             data.aggregated_importance.forEach(param => {
               const barWidth = param.percentage;
               html += `
-            <tr>
-              <td><strong>${param.parameter}</strong></td>
-              <td>
-                <div class="d-flex align-items-center">
-                  <div class="progress flex-grow-1 me-2" style="height: 40px;">
-                    <div class="progress-bar" role="progressbar" 
-                         style="width: ${barWidth}%; background-color: #0d3b66;" 
-                         aria-valuenow="${barWidth}" aria-valuemin="0" aria-valuemax="100">
+              <tr>
+                <td><strong>${param.parameter}</strong></td>
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="progress flex-grow-1" style="height: 40px; margin-right: 4px;">
+                      <div class="progress-bar" role="progressbar" 
+                          style="width: ${barWidth}%; background-color: #0d3b66;" 
+                          aria-valuenow="${barWidth}" aria-valuemin="0" aria-valuemax="100">
+                      </div>
                     </div>
+                    <span class="text-nowrap" style="min-width: 50px;">${param.percentage.toFixed(1)}%</span>
                   </div>
-                  <span class="text-nowrap">${param.percentage.toFixed(1)}%</span>
-                </div>
-              </td>
-            </tr>
-          `;
+                </td>
+              </tr>
+            `;
             });
 
-            html += '</tbody></table></div></div>';
-
-            // Add unmatched features info
-            if (data.unmatched_features && data.unmatched_features.count > 0) {
-              html += '<div class="alert alert-info">';
-              html += `<strong>Note:</strong> ${data.unmatched_features.count} features (${data.unmatched_features.percentage.toFixed(1)}%) `;
-              html += 'represent biological traits and derived features not directly mapped to the 6 core environmental parameters.';
-              html += '</div>';
-            }
+            html += `
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          `;
 
             container.innerHTML = html;
           }
+
         });
       </script>
 </body>
