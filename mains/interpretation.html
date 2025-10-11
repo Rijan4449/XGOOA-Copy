@@ -173,7 +173,8 @@
 
               <div class="d-flex justify-content-center gap-2 mt-3">
                 <button type="submit" class="btn btn-brand2">Run Prediction</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="SharedState.confirmAndReset()" title="Clear all inputs and start fresh">
+                <button type="button" class="btn btn-outline-secondary" onclick="SharedState.confirmAndReset()"
+                  title="Clear all inputs and start fresh">
                   <i class="bi bi-arrow-clockwise me-1"></i> New Prediction
                 </button>
               </div>
@@ -511,7 +512,7 @@
             html += '<h5 class="mb-3">Aggregated Feature Importance by Environmental Parameter</h5>';
             html += '<div class="table-responsive">';
             html += '<table class="table table-striped">';
-            html += '<thead><tr><th>Parameter</th><th>Total Importance</th><th>Feature Count</th><th>Percentage</th></tr></thead>';
+            html += '<thead><tr><th>Parameter</th><th>Percentage</th></tr></thead>';
             html += '<tbody>';
 
             data.aggregated_importance.forEach(param => {
@@ -519,13 +520,11 @@
               html += `
             <tr>
               <td><strong>${param.parameter}</strong></td>
-              <td>${param.total_importance.toFixed(2)}</td>
-              <td>${param.feature_count}</td>
               <td>
                 <div class="d-flex align-items-center">
-                  <div class="progress flex-grow-1 me-2" style="height: 20px;">
-                    <div class="progress-bar bg-primary" role="progressbar" 
-                         style="width: ${barWidth}%" 
+                  <div class="progress flex-grow-1 me-2" style="height: 40px;">
+                    <div class="progress-bar" role="progressbar" 
+                         style="width: ${barWidth}%; background-color: #0d3b66;" 
                          aria-valuenow="${barWidth}" aria-valuemin="0" aria-valuemax="100">
                     </div>
                   </div>
