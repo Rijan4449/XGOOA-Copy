@@ -50,27 +50,28 @@ dataset_path = os.path.join(BASE_DIR, "dataset", "super_dataset.csv")
 super_dataset = pd.read_csv(dataset_path)
 print(f"✓ Dataset loaded: {len(super_dataset)} records")
 
-# Hardcoded Luzon lake data with coordinates
+# Hardcoded Luzon lake data with coordinates (Lake Danao removed)
 luzon_lakes = pd.DataFrame({
     "Lake Name": [
         "Laguna de Bay", "Lake Taal", "Sampaloc Lake", "Yambo Lake",
         "Pandin Lake", "Mohicap Lake", "Palakpakin Lake", "Nabao Lake",
-        "Tadlac Lake", "Tikub Lake", "Lake Buhi", "Lake Danao", "Bunot Lake"
+        "Tadlac Lake", "Tikub Lake", "Lake Buhi", "Bunot Lake"
     ],
     "Region": [
         "IV-A", "IV-A", "IV-A", "IV-A",
         "IV-A", "IV-A", "IV-A", "IV-A",
-        "IV-A", "IV-A", "V", "VIII", "IV-A"
+        "IV-A", "IV-A", "V", "IV-A"
     ],
-    "pH": [9.12, 8.32, 7.9, 7.9, 7.8, 7.7, 8.0, 6.33, 7.44, 8.08, 7.95, 7.81, 7.2],
-    "Salinity (ppt)": [0.746, 0.85, 0.1, 0.1, 0.1, 0.1, 0.1, 0.25, 0.361, 0.1, 0.7, 0.1, 0.1],
-    "Dissolved Oxygen (mg/L)": [7.54, 5.61, 3.1, 5.0, 7.3, 4.1, 5.0, 3.14, 7.27, 5.53, 6.89, 7.15, 7.7],
-    "BOD (mg/L)": [1.93, 3.82, 8.0, 2.5, 2.0, 6.8, 3.1, 3.0, 2.33, 2.3, 1.76, 2.49, 10.2],
-    "Turbidity (NTU)": [161.88, 28.0, 28.0, 9.8, 6.5, 10.0, 28.0, 3.5, 3.5, 3.5, 6.18, 2.25, 9.0],
-    "Temperature (°C)": [28.5, 25.5, 27.8, 26.5, 25.8, 26.2, 24.2, 28.0, 29.5, 30.4, 28.5, 29.5, 28.5],
-    "Latitude": [14.4, 14.0, 14.1, 14.15, 14.12, 14.11, 14.13, 14.09, 14.08, 14.16, 13.43, 11.05, 14.14],
-    "Longitude": [121.3, 120.98, 121.18, 121.2, 121.19, 121.17, 121.21, 121.16, 121.15, 121.22, 123.52, 124.95, 121.23]
+    "pH": [9.12, 8.32, 7.9, 7.9, 7.8, 7.7, 8.0, 6.33, 7.44, 8.08, 7.95, 7.2],
+    "Salinity (ppt)": [0.746, 0.85, 0.1, 0.1, 0.1, 0.1, 0.1, 0.25, 0.361, 0.1, 0.7, 0.1],
+    "Dissolved Oxygen (mg/L)": [7.54, 5.61, 3.1, 5.0, 7.3, 4.1, 5.0, 3.14, 7.27, 5.53, 6.89, 7.7],
+    "BOD (mg/L)": [1.93, 3.82, 8.0, 2.5, 2.0, 6.8, 3.1, 3.0, 2.33, 2.3, 1.76, 10.2],
+    "Turbidity (NTU)": [161.88, 28.0, 28.0, 9.8, 6.5, 10.0, 28.0, 3.5, 3.5, 3.5, 6.18, 9.0],
+    "Temperature (°C)": [28.5, 25.5, 27.8, 26.5, 25.8, 26.2, 24.2, 28.0, 29.5, 30.4, 28.5, 28.5],
+    "Latitude": [14.4, 14.0, 14.1, 14.15, 14.12, 14.11, 14.13, 14.09, 14.08, 14.16, 13.43, 14.14],
+    "Longitude": [121.3, 120.98, 121.18, 121.2, 121.19, 121.17, 121.21, 121.16, 121.15, 121.22, 123.52, 121.23]
 })
+
 
 print(f"✓ Luzon lakes data loaded: {len(luzon_lakes)} lakes")
 
@@ -85,7 +86,7 @@ print(f"✓ Luzon lakes data loaded: {len(luzon_lakes)} lakes")
 LUZON_LAKES = [
     "Laguna de Bay", "Lake Taal", "Sampaloc Lake", "Yambo Lake",
     "Pandin Lake", "Mohicap Lake", "Palakpakin Lake", "Nabao Lake",
-    "Tadlac Lake", "Tikub Lake", "Lake Buhi", "Lake Danao", "Bunot Lake"
+    "Tadlac Lake", "Tikub Lake", "Lake Buhi", "Bunot Lake"
 ]
 
 LAKE_NAME_MAPPING = {
@@ -119,10 +120,6 @@ LAKE_NAME_MAPPING = {
     "Lake Pandin, Laguna": "Pandin Lake",
     "Lake Palakpakin, Laguna": "Palakpakin Lake",
     "Lake Bunot, Laguna": "Bunot Lake",
-    "Lake Danao, Philippines": "Lake Danao",
-    "Lake Danao, Cebu": "Lake Danao",
-    "Lake Danao (Cebu)": "Lake Danao",
-    "Lake Danao, Leyte": "Lake Danao",
     "Lake Mohicap": "Mohicap Lake",
     "Lake Nabao": "Nabao Lake",
     "Lake Tadlac": "Tadlac Lake",
