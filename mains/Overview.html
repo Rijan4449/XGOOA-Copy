@@ -63,7 +63,13 @@
             <form id="predict-form">
               <!-- Temperature -->
               <div class="slider-head">
-                <label for="temperature" class="mb-1">Temperature (°C)</label>
+                <label for="temperature" class="mb-1 d-flex align-items-center">Temperature (°C)
+                <i class="bi bi-question-circle ms-2" 
+                  style= "color:#0C3970;"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="right"
+                  title="Temperature affects fish by increasing their metabolic rate, which raises their oxygen and food demands while often forcing them to move to areas with more suitable conditions for feeding and survival."></i>
+                </label>
                 <span id="temperature_value" class="slider-value">0</span>
               </div>
               <div class="bg-brand rounded-4 p-2 px-3 mb-3">
@@ -72,7 +78,13 @@
 
               <!-- Water pH -->
               <div class="slider-head">
-                <label for="water_ph" class="mb-1">Water pH</label>
+                <label for="water_ph" class="mb-1">Water pH
+                <i class="bi bi-question-circle" 
+                  style= "color:#0C3970;"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="right"
+                  title="pH levels affect fish by influencing their growth, reproduction, and immune function, as values outside their optimal range cause stress, increase disease risk, and disrupt essential processes like nitrification and water quality balance."></i>
+                </label>
                 <span id="water_ph_value" class="slider-value">0</span>
               </div>
               <div class="bg-brand rounded-4 p-2 px-3 mb-3">
@@ -81,16 +93,27 @@
 
               <!-- Salinity -->
               <div class="slider-head">
-                <label for="salinity" class="mb-1">Salinity (ppt)</label>
+                <label for="salinity" class="mb-1">Salinity (ppt)
+                <i class="bi bi-question-circle" 
+                  style= "color:#0C3970;"
+                  data-bs-placement="right"
+                  title="Salinity affects fish by impacting their physiology, behavior, growth, and reproduction, primarily through the process of osmoregulation, which is the regulation of the body's salt and water balance."></i>
+                </label>
                 <span id="salinity_value" class="slider-value">0</span>
               </div>
               <div class="bg-brand rounded-4 p-2 px-3 mb-3">
-                <input type="range" id="salinity" class="form-range" min="0" max="50" step="0.1" value="0">
+                <input type="range" id="salinity" class="form-range" min="0" max="40" step="0.1" value="0">
               </div>
 
               <!-- Dissolved Oxygen -->
               <div class="slider-head">
-                <label for="dissolved_oxygen" class="mb-1">Dissolved Oxygen (mg/L)</label>
+                <label for="dissolved_oxygen" class="mb-1">Dissolved Oxygen (mg/L)
+                <i class="bi bi-question-circle" 
+                  style= "color:#0C3970;"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="right"
+                  title="Dissolved oxygen (DO) is vital for fish survival, as low DO levels reduce their ability to breathe and can lead to stress or death, while adequate oxygen supports healthy growth and overall aquatic ecosystem balance."></i>
+                </label>
                 <span id="dissolved_oxygen_value" class="slider-value">0</span>
               </div>
               <div class="bg-brand rounded-4 p-2 px-3 mb-3">
@@ -99,16 +122,28 @@
 
               <!-- BOD -->
               <div class="slider-head">
-                <label for="bod" class="mb-1">Biochemical Oxygen Demand (BOD) (mg/L)</label>
+                <label for="bod" class="mb-1">Biochemical Oxygen Demand (BOD) (mg/L)
+                <i class="bi bi-question-circle" 
+                  style= "color:#0C3970;"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="right"
+                  title="Biochemical Oxygen Demand (BOD) affects fish by reducing the amount of dissolved oxygen in the water, and as BOD increases, oxygen depletion intensifies, leading to stress, suffocation, and death among aquatic organisms while promoting harmful processes like eutrophication."></i>
+                </label>
                 <span id="bod_value" class="slider-value">0</span>
               </div>
               <div class="bg-brand rounded-4 p-2 px-3 mb-3">
-                <input type="range" id="bod" class="form-range" min="0" max="10" step="0.1" value="0">
+                <input type="range" id="bod" class="form-range" min="0" max="140" step="0.1" value="0">
               </div>
 
               <!-- Turbidity -->
               <div class="slider-head">
-                <label for="turbidity" class="mb-1">Turbidity (NTU)</label>
+                <label for="turbidity" class="mb-1">Turbidity (NTU)
+                <i class="bi bi-question-circle" 
+                  style= "color:#0C3970;"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="right"
+                  title="Turbidity affects fish by reducing water clarity, clogging gills, lowering oxygen levels, and hindering feeding and predator avoidance, ultimately impacting their growth, health, and survival."></i>
+                </label>
                 <span id="turbidity_value" class="slider-value">0</span>
               </div>
               <div class="bg-brand rounded-4 p-2 px-3 mb-3">
@@ -230,6 +265,12 @@
 
   <script>
     $("#sidebar-container").load("../includes/sidebar.html");
+
+    // Tooltip activation script
+          const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+          tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+          });
 
     // API Configuration
     const API_BASE_URL = "http://localhost:5000/api";
