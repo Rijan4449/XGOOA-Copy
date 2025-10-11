@@ -53,9 +53,9 @@ print(f"✓ Dataset loaded: {len(super_dataset)} records")
 # Hardcoded Luzon lake data with coordinates (Lake Danao removed)
 luzon_lakes = pd.DataFrame({
     "Lake Name": [
-        "Laguna de Bay", "Lake Taal", "Sampaloc Lake", "Yambo Lake",
-        "Pandin Lake", "Mohicap Lake", "Palakpakin Lake", "Nabao Lake",
-        "Tadlac Lake", "Tikub Lake", "Lake Buhi", "Bunot Lake"
+        "Laguna de Bay", "Lake Taal", "Lake Sampaloc", "Lake Yambo",
+        "Lake Pandin", "Lake Mohicap", "Lake Palakpakin", "Lake Nabao",
+        "Lake Tadlac", "Lake Tikub", "Lake Buhi", "Lake Bunot"
     ],
     "Region": [
         "IV-A", "IV-A", "IV-A", "IV-A",
@@ -84,13 +84,13 @@ print(f"✓ Luzon lakes data loaded: {len(luzon_lakes)} lakes")
 # ============================================================================
 
 LUZON_LAKES = [
-    "Laguna de Bay", "Lake Taal", "Sampaloc Lake", "Yambo Lake",
-    "Pandin Lake", "Mohicap Lake", "Palakpakin Lake", "Nabao Lake",
-    "Tadlac Lake", "Tikub Lake", "Lake Buhi", "Bunot Lake"
+    "Laguna de Bay", "Lake Taal", "Lake Sampaloc", "Lake Yambo",
+    "Lake Pandin", "Lake Mohicap", "Lake Palakpakin", "Lake Nabao",
+    "Lake Tadlac", "Lake Tikub", "Lake Buhi", "Lake Bunot"
 ]
 
 LAKE_NAME_MAPPING = {
-    # ... (same as before, omitted for brevity) ...
+    # Laguna de Bay variants
     "Laguna de Bay": "Laguna de Bay",
     "Laguna de Bay, Philippines": "Laguna de Bay",
     "Laguna de Bay, PH": "Laguna de Bay",
@@ -101,30 +101,66 @@ LAKE_NAME_MAPPING = {
     "Laguna Lake": "Laguna de Bay",
     "Laguna Lake, Philippines": "Laguna de Bay",
     "Laguna Lake (Laguna)": "Laguna de Bay",
+
+    # Lake Taal variants
     "Taal Lake": "Lake Taal",
+    "Lake Taal": "Lake Taal",
     "Lake Taal, Philippines": "Lake Taal",
     "Lake Taal, Batangas": "Lake Taal",
     "Lake Taal (Batangas)": "Lake Taal",
     "Taal Lake, Philippines": "Lake Taal",
     "Taal Freshwater Pond": "Lake Taal",
-    "Lake Sampaloc": "Sampaloc Lake",
-    "Sampaloc Lake": "Sampaloc Lake",
-    "Lake Sampaloc, Quezon": "Sampaloc Lake",
-    "Lake Sampaloc (San Pablo)": "Sampaloc Lake",
-    "Lake Sampaloc, Philippines": "Sampaloc Lake",
+
+    # Lake Sampaloc variants
+    "Lake Sampaloc": "Lake Sampaloc",
+    "Sampaloc Lake": "Lake Sampaloc",
+    "Lake Sampaloc, Quezon": "Lake Sampaloc",
+    "Lake Sampaloc (San Pablo)": "Lake Sampaloc",
+    "Lake Sampaloc, Philippines": "Lake Sampaloc",
+
+    # Lake Buhi variants
     "Lake Buhi": "Lake Buhi",
     "Lake Buhi, Camarines Sur": "Lake Buhi",
     "Lake Buhi, Philippines": "Lake Buhi",
     "Buhi Lake": "Lake Buhi",
-    "Lake Yambo, Laguna": "Yambo Lake",
-    "Lake Pandin, Laguna": "Pandin Lake",
-    "Lake Palakpakin, Laguna": "Palakpakin Lake",
-    "Lake Bunot, Laguna": "Bunot Lake",
-    "Lake Mohicap": "Mohicap Lake",
-    "Lake Nabao": "Nabao Lake",
-    "Lake Tadlac": "Tadlac Lake",
-    "Lake Tikub": "Tikub Lake",
+
+    # Lake Yambo variants
+    "Lake Yambo": "Lake Yambo",
+    "Yambo Lake": "Lake Yambo",
+    "Lake Yambo, Laguna": "Lake Yambo",
+
+    # Lake Pandin variants
+    "Lake Pandin": "Lake Pandin",
+    "Pandin Lake": "Lake Pandin",
+    "Lake Pandin, Laguna": "Lake Pandin",
+
+    # Lake Palakpakin variants
+    "Lake Palakpakin": "Lake Palakpakin",
+    "Palakpakin Lake": "Lake Palakpakin",
+    "Lake Palakpakin, Laguna": "Lake Palakpakin",
+
+    # Lake Bunot variants
+    "Lake Bunot": "Lake Bunot",
+    "Bunot Lake": "Lake Bunot",
+    "Lake Bunot, Laguna": "Lake Bunot",
+
+    # Lake Mohicap variants
+    "Lake Mohicap": "Lake Mohicap",
+    "Mohicap Lake": "Lake Mohicap",
+
+    # Lake Nabao variants
+    "Lake Nabao": "Lake Nabao",
+    "Nabao Lake": "Lake Nabao",
+
+    # Lake Tadlac variants
+    "Lake Tadlac": "Lake Tadlac",
+    "Tadlac Lake": "Lake Tadlac",
+
+    # Lake Tikub variants
+    "Lake Tikub": "Lake Tikub",
+    "Tikub Lake": "Lake Tikub",
 }
+
 
 def normalize_lake_name(lake_name: str) -> Optional[str]:
     if lake_name in LAKE_NAME_MAPPING:
