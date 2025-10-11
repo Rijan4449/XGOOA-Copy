@@ -225,7 +225,8 @@
 
               <div class="d-flex justify-content-center gap-2 mt-3">
                 <button type="submit" class="btn btn-brand2">Run Prediction</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="SharedState.confirmAndReset()" title="Clear all inputs and start fresh">
+                <button type="button" class="btn btn-outline-secondary" onclick="SharedState.confirmAndReset()"
+                  title="Clear all inputs and start fresh">
                   <i class="bi bi-arrow-clockwise me-1"></i> New Prediction
                 </button>
               </div>
@@ -373,19 +374,23 @@
       pointsLayer = L.geoJSON(geojson, {
         pointToLayer: (feature, latlng) => {
           const p = feature?.properties?.prob ?? 0;
+          const presence = feature?.properties?.presence;
+
           return L.circleMarker(latlng, {
             radius: 8,
             weight: 1,
             color: "#333",
             fillOpacity: 0.85,
             fillColor: probColor(p)
-          }).bindPopup(
-            `<b>${feature?.properties?.name || "Location"}</b><br/>
-             Probability: <b>${p.toFixed(3)}</b>`
-          );
+          }).bindPopup(`
+          <b>${feature?.properties?.name || "Location"}</b><br/>
+          Probability: <b>${p.toFixed(3)}</b><br/>
+          Presence: <b>${presence}</b><br/>
+        `);
         }
       }).addTo(map);
     }
+
 
     function buildQueryFromForm() {
       const params = new URLSearchParams();
@@ -438,10 +443,10 @@
 
           const data = await response.json();
           console.log('Received prediction data:', data);
-          
+
           // Save prediction results to localStorage
           SharedState.savePredictionResults(data);
-          
+
           renderPoints(data);
         }
       } catch (err) {
