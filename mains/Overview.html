@@ -188,6 +188,71 @@
             </p>
           </div>
         </div>
+        <div class="row g-3">
+
+  <!-- Grid of compact square cards -->
+<div class="row g-3">
+
+  <!-- System Overview -->
+  <div class="col-md-6">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold mb-2" style="color: #0d3b66; font-size: x-large;">System Overview</h6>
+        <p class="mb-0">
+          The system integrates the <strong> Extreme Gradient Boosting (XGBoost) </strong>  algorithm with the <strong> Modified Osprey Optimization Algorithm (MOOA) </strong>
+          to perform automated hyperparameter tuning and deliver precise invasion risk predictions. It processes real-time water-quality data 
+          such as <strong> pH, temperature, salinity, biochemical oxygen demand, and dissolved oxygen </strong> to compute invasion likelihoods. 
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Invasion Risk Map -->
+  <div class="col-md-6">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold mb-2" style="color: #0d3b66; font-size: x-large;">Invasion Risk Map</h6>
+        <p class="mb-0">
+          The invasion risk map provides a color-coded visualization of <strong> Luzon’s major lakes </strong>, displaying predicted risk levels as green for low, 
+          yellow for medium, and red for high. By clicking on a specific lake, users can view detailed ecological parameters,
+          and species-specific invasion probabilities. This feature allows users to easily <strong> compare invasion risks across multiple regions </strong> and 
+          interpret data through an intuitive and interactive layout.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interpretation (SHAP) -->
+  <div class="col-md-6">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold mb-2" style="color: #0d3b66; font-size: x-large;">Interpretation (SHAP)</h6>
+        <p class="mb-0">
+          The interpretation section uses <strong> SHapley Additive exPlanations (SHAP) </strong> to clarify how each environmental variable influences 
+          the model’s prediction. It visualizes contributors to the invasion risk, showing which parameters, 
+          such as temperature or pH, have the greatest effect on the output. This component enhances the transparency and interpretability 
+          of the model, helping users understand the reasoning behind each result.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Risk Scores -->
+  <div class="col-md-6">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold mb-2" style="color: #0d3b66; font-size: x-large;">Risk Scores</h6>
+        <p class="mb-0">
+          The risk score section displays the computed invasion probability ranging from <strong> 0.00 to 1.00 </strong>, categorized as <strong> Low, Medium, or High </strong>. 
+          It identifies the most influential environmental factor contributing to each prediction and provides a summarized overview of 
+          the species’ invasion potential. This section is designed for quick interpretation, monitoring, and integration into research 
+          reports and ecological management systems.
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>
       <!--
         <div class="row g-4 mb-4">
           <div class="col-md-6">
