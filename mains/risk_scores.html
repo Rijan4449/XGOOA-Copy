@@ -468,25 +468,19 @@
 
       function loadRiskScores() {
         const tbody = document.getElementById("risk-score-table-body");
-
-        // Get the scientific name from the selected option
-        const specieSelect = document.getElementById('specie');
-        const selectedOption = specieSelect.options[specieSelect.selectedIndex];
-        const speciesName = selectedOption ? selectedOption.getAttribute('data-sci') : '';
-
-        if (!speciesName) {
-          tbody.innerHTML = `<tr><td colspan="4" class="text-center text-warning py-3">Please select a species first!</td></tr>`;
-          return;
-        }
-
         tbody.innerHTML = `
-        <tr>
+          <tr>
             <td colspan="4" class="text-center text-muted py-3">
-                <div class="spinner-border text-primary me-2" role="status"></div>
-                Fetching data...
+              <div class="spinner-border text-primary me-2" role="status"></div>
+              Fetching data from database...
             </td>
-        </tr>
-    `;
+          </tr>
+        `;
+
+        // Get selected species scientific name (ensure CSV populates data-sci)
+        const specieSelect = document.getElementById('specie');
+        const selectedOption = specieSelect.selectedOptions && specieSelect.selectedOptions[0];
+        const speciesName = selectedOption ? selectedOption.getAttribute('data-sci') : '';
 
         const payload = {
           species: speciesName,
@@ -495,41 +489,43 @@
           salinity: parseFloat(document.getElementById('salinity').value),
           dissolved_oxygen: parseFloat(document.getElementById('dissolved_oxygen').value),
           bod: parseFloat(document.getElementById('bod').value),
-          turbidity: parseFloat(document.getElementById('turbidity').value)
+          turbidity: parseFloat(document.getElementById('turbidity').value),
+          model_choice: document.getElementById('model_choice') ? document.getElementById('model_choice').value : 'xgooa'
         };
-
-        console.log('Loading risk scores with payload:', payload);
 
         fetch('http://localhost:5000/api/risk-scores', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         })
-          .then(response => response.json())
+          .then(async response => {
+            if (!response.ok) {
+              const txt = await response.text();
+              throw new Error(`HTTP error! status: ${response.status} ${txt}`);
+            }
+            return response.json();
+          })
           .then(data => {
-            if (!data.success || !data.data.length) {
-              tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3"><em>No data available.</em></td></tr>`;
+            if (!data.success || !Array.isArray(data.data) || !data.data.length) {
+              tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3"><em>No data found in database.</em></td></tr>`;
               return;
             }
-
             tbody.innerHTML = data.data.map(row => `
             <tr>
-                <td>${row.lake}</td>
-                <td>${row.region}</td>
-                <td>${row.score.toFixed(3)}</td>
-                <td>${row.presence === 'Yes' ? 'Yes' : row.presence === 'No' ? 'No' : '?'}</td>
+              <td>${row.lake || '-'}</td>
+              <td>${row.region || '-'}</td>
+              <td>${typeof row.score === 'number' ? row.score.toFixed(2) : (row.score || '-')}</td>
+              <td>${row.presence === 'Yes' ? 'Yes' : row.presence === 'No' ? 'No' : (row.presence || '?')}</td>
             </tr>
-        `).join('');
+          `).join('');
           })
           .catch(err => {
-            console.error("Failed to load risk scores:", err);
+            console.error("Database fetch error:", err);
             tbody.innerHTML = `
-            <tr><td colspan="5" class="text-center text-danger py-3">
-                Failed to load data.
+            <tr><td colspan="4" class="text-center text-danger py-3">
+              Failed to load data from database.
             </td></tr>
-        `;
+          `;
           });
       }
 

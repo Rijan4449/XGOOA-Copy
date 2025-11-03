@@ -593,6 +593,50 @@
 
         });
       </script>
+
+      <!-- restore inputs (use same keys as other pages) and call SHAP endpoint -->
+      <script>
+        // restore inputs (use same keys as other pages) and call SHAP endpoint
+        function callFeatureImportance() {
+          const specie = document.getElementById('specie');
+          const selected = specie && specie.selectedOptions && specie.selectedOptions[0];
+          const speciesName = selected ? selected.getAttribute('data-sci') : '';
+
+          const payload = {
+            species: speciesName,
+            temperature: parseFloat(document.getElementById('temperature').value || 0),
+            ph: parseFloat(document.getElementById('water_ph').value || 0),
+            salinity: parseFloat(document.getElementById('salinity').value || 0),
+            dissolved_oxygen: parseFloat(document.getElementById('dissolved_oxygen').value || 0),
+            bod: parseFloat(document.getElementById('bod').value || 0),
+            turbidity: parseFloat(document.getElementById('turbidity').value || 0),
+            model_choice: document.getElementById('model_choice') ? document.getElementById('model_choice').value : 'xgooa'
+          };
+
+          fetch('http://localhost:5000/api/interpretation/feature-importance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          })
+            .then(async res => {
+              if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+              return res.json();
+            })
+            .then(resp => {
+              if (!resp.success) throw new Error(resp.error || 'Interpretation failed');
+              // render resp.data (handle as your existing UI expects)
+              console.log('SHAP result', resp.data);
+            })
+            .catch(err => {
+              console.error('Failed to load feature importance:', err);
+            });
+        }
+
+        // Optionally call when page loads if saved state exists
+        document.addEventListener('DOMContentLoaded', () => {
+          // restore form state code should live in shared_state.js; call callFeatureImportance() after restore if desired
+        });
+      </script>
 </body>
 
 </html>
