@@ -163,11 +163,9 @@
               <!-- Temperature -->
               <div class="slider-head">
                 <label for="temperature" class="mb-1 d-flex align-items-center">Temperature (°C)
-                <i class="bi bi-question-circle ms-2" 
-                  style= "color:#0C3970;"
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="right"
-                  title="Temperature affects fish by increasing their metabolic rate, which raises their oxygen and food demands while often forcing them to move to areas with more suitable conditions for feeding and survival."></i>
+                  <i class="bi bi-question-circle ms-2" style="color:#0C3970;" data-bs-toggle="tooltip"
+                    data-bs-placement="right"
+                    title="Temperature affects fish by increasing their metabolic rate, which raises their oxygen and food demands while often forcing them to move to areas with more suitable conditions for feeding and survival."></i>
                 </label>
                 <span id="temperature_value" class="slider-value">0</span>
               </div>
@@ -178,11 +176,9 @@
               <!-- Water pH -->
               <div class="slider-head">
                 <label for="water_ph" class="mb-1">Water pH
-                <i class="bi bi-question-circle" 
-                  style= "color:#0C3970;"
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="right"
-                  title="pH levels affect fish by influencing their growth, reproduction, and immune function, as values outside their optimal range cause stress, increase disease risk, and disrupt essential processes like nitrification and water quality balance."></i>
+                  <i class="bi bi-question-circle" style="color:#0C3970;" data-bs-toggle="tooltip"
+                    data-bs-placement="right"
+                    title="pH levels affect fish by influencing their growth, reproduction, and immune function, as values outside their optimal range cause stress, increase disease risk, and disrupt essential processes like nitrification and water quality balance."></i>
                 </label>
                 <span id="water_ph_value" class="slider-value">0</span>
               </div>
@@ -193,10 +189,8 @@
               <!-- Salinity -->
               <div class="slider-head">
                 <label for="salinity" class="mb-1">Salinity (ppt)
-                <i class="bi bi-question-circle" 
-                  style= "color:#0C3970;"
-                  data-bs-placement="right"
-                  title="Salinity affects fish by impacting their physiology, behavior, growth, and reproduction, primarily through the process of osmoregulation, which is the regulation of the body's salt and water balance."></i>
+                  <i class="bi bi-question-circle" style="color:#0C3970;" data-bs-placement="right"
+                    title="Salinity affects fish by impacting their physiology, behavior, growth, and reproduction, primarily through the process of osmoregulation, which is the regulation of the body's salt and water balance."></i>
                 </label>
                 <span id="salinity_value" class="slider-value">0</span>
               </div>
@@ -207,11 +201,9 @@
               <!-- Dissolved Oxygen -->
               <div class="slider-head">
                 <label for="dissolved_oxygen" class="mb-1">Dissolved Oxygen (mg/L)
-                <i class="bi bi-question-circle" 
-                  style= "color:#0C3970;"
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="right"
-                  title="Dissolved oxygen (DO) is vital for fish survival, as low DO levels reduce their ability to breathe and can lead to stress or death, while adequate oxygen supports healthy growth and overall aquatic ecosystem balance."></i>
+                  <i class="bi bi-question-circle" style="color:#0C3970;" data-bs-toggle="tooltip"
+                    data-bs-placement="right"
+                    title="Dissolved oxygen (DO) is vital for fish survival, as low DO levels reduce their ability to breathe and can lead to stress or death, while adequate oxygen supports healthy growth and overall aquatic ecosystem balance."></i>
                 </label>
                 <span id="dissolved_oxygen_value" class="slider-value">0</span>
               </div>
@@ -222,11 +214,9 @@
               <!-- BOD -->
               <div class="slider-head">
                 <label for="bod" class="mb-1">Biochemical Oxygen Demand (BOD) (mg/L)
-                <i class="bi bi-question-circle" 
-                  style= "color:#0C3970;"
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="right"
-                  title="Biochemical Oxygen Demand (BOD) affects fish by reducing the amount of dissolved oxygen in the water, and as BOD increases, oxygen depletion intensifies, leading to stress, suffocation, and death among aquatic organisms while promoting harmful processes like eutrophication."></i>
+                  <i class="bi bi-question-circle" style="color:#0C3970;" data-bs-toggle="tooltip"
+                    data-bs-placement="right"
+                    title="Biochemical Oxygen Demand (BOD) affects fish by reducing the amount of dissolved oxygen in the water, and as BOD increases, oxygen depletion intensifies, leading to stress, suffocation, and death among aquatic organisms while promoting harmful processes like eutrophication."></i>
                 </label>
                 <span id="bod_value" class="slider-value">0</span>
               </div>
@@ -237,11 +227,9 @@
               <!-- Turbidity -->
               <div class="slider-head">
                 <label for="turbidity" class="mb-1">Turbidity (NTU)
-                <i class="bi bi-question-circle" 
-                  style= "color:#0C3970;"
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="right"
-                  title="Turbidity affects fish by reducing water clarity, clogging gills, lowering oxygen levels, and hindering feeding and predator avoidance, ultimately impacting their growth, health, and survival."></i>
+                  <i class="bi bi-question-circle" style="color:#0C3970;" data-bs-toggle="tooltip"
+                    data-bs-placement="right"
+                    title="Turbidity affects fish by reducing water clarity, clogging gills, lowering oxygen levels, and hindering feeding and predator avoidance, ultimately impacting their growth, health, and survival."></i>
                 </label>
                 <span id="turbidity_value" class="slider-value">0</span>
               </div>
@@ -267,15 +255,15 @@
               </div>
             </form>
             <!-- Model Choice -->
-              <label for="model_choice" class="mb-1 mt-3">Model to Use</label>
-              <select id="model_choice" class="form-select rounded-4 mb-3">
-                <option value="xgooa" selected>Proposed Model (XGOOA)</option>
-                <option value="xgboost">XGBoost</option>
-                <option value="mooa">Modified Osprey Optimization Algorithm (MOOA)</option>
-              </select>
-              <small class="text-muted d-block mb-4">
-                Choose which model to run for the prediction.
-              </small>
+            <label for="model_choice" class="mb-1 mt-3">Model to Use</label>
+            <select id="model_choice" class="form-select rounded-4 mb-3">
+              <option value="xgooa" selected>Proposed Model (XGOOA)</option>
+              <option value="xgboost">XGBoost</option>
+              <option value="mooa">Osprey Optimization Algorithm (MOOA)</option>
+            </select>
+            <small class="text-muted d-block mb-4">
+              Choose which model to run for the prediction.
+            </small>
           </div>
         </div>
       </div>
@@ -299,14 +287,14 @@
                 <i class="bi bi-arrows-fullscreen me-1"></i> Expand Map
               </button>
               -->
-            </div>
-            <div id="mapNormalContainer" class="rounded-4">
-              <div id="map" class="rounded"></div>
-            </div>
+          </div>
+          <div id="mapNormalContainer" class="rounded-4">
+            <div id="map" class="rounded"></div>
           </div>
         </div>
       </div>
     </div>
+  </div>
   </div>
 
   <!-- Fullscreen Overlay -->
@@ -350,10 +338,10 @@
 
   <script>
     // Tooltip activation script
-          const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-          tooltipTriggerList.forEach(function (tooltipTriggerEl) {
-            new bootstrap.Tooltip(tooltipTriggerEl);
-          });
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+      new bootstrap.Tooltip(tooltipTriggerEl);
+    });
     // Sidebar
     $("#sidebar-container").load("../includes/sidebar.html");
 
