@@ -34,16 +34,61 @@ warnings.filterwarnings('ignore')
 # Get the base directory (parent of backend folder)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Load XGBoost model
-general_model = xgb.XGBClassifier()
-model_path = os.path.join(BASE_DIR, "model", "mooa_xgb_model_v4.json")
-general_model.load_model(model_path)
-print(f"✓ Model loaded from {model_path}")
+# Load XGBoost models and preprocessors (baseline, OOA, MOOA)
 
-# Load preprocessor
-preprocessor_path = os.path.join(BASE_DIR, "model", "mooa_preprocessor_v4.joblib")
-general_preprocessor = joblib.load(preprocessor_path)
-print(f"✓ Preprocessor loaded from {preprocessor_path}")
+# Baseline model + preprocessor
+baseline_model = xgb.XGBClassifier()
+baseline_model_path = os.path.join(BASE_DIR, "model", "baseline_model.json")
+try:
+    baseline_model.load_model(baseline_model_path)
+    print(f"✓ Baseline model loaded from {baseline_model_path}")
+except Exception as e:
+    baseline_model = None
+    print(f"⚠ Failed to load baseline model from {baseline_model_path}: {e}")
+
+baseline_preprocessor_path = os.path.join(BASE_DIR, "model", "baseline_preprocessor.joblib")
+try:
+    baseline_preprocessor = joblib.load(baseline_preprocessor_path)
+    print(f"✓ Baseline preprocessor loaded from {baseline_preprocessor_path}")
+except Exception as e:
+    baseline_preprocessor = None
+    print(f"⚠ Failed to load baseline preprocessor from {baseline_preprocessor_path}: {e}")
+
+# OOA model + preprocessor
+ooa_model = xgb.XGBClassifier()
+ooa_model_path = os.path.join(BASE_DIR, "model", "ooa_model.json")
+try:
+    ooa_model.load_model(ooa_model_path)
+    print(f"✓ OOA model loaded from {ooa_model_path}")
+except Exception as e:
+    ooa_model = None
+    print(f"⚠ Failed to load OOA model from {ooa_model_path}: {e}")
+
+ooa_preprocessor_path = os.path.join(BASE_DIR, "model", "ooa_preprocessor.joblib")
+try:
+    ooa_preprocessor = joblib.load(ooa_preprocessor_path)
+    print(f"✓ OOA preprocessor loaded from {ooa_preprocessor_path}")
+except Exception as e:
+    ooa_preprocessor = None
+    print(f"⚠ Failed to load OOA preprocessor from {ooa_preprocessor_path}: {e}")
+
+# MOOA model + preprocessor (existing filenames preserved)
+mooa_model = xgb.XGBClassifier()
+mooa_model_path = os.path.join(BASE_DIR, "model", "mooa_xgb_model_v4.json")
+try:
+    mooa_model.load_model(mooa_model_path)
+    print(f"✓ MOOA model loaded from {mooa_model_path}")
+except Exception as e:
+    mooa_model = None
+    print(f"⚠ Failed to load MOOA model from {mooa_model_path}: {e}")
+
+mooa_preprocessor_path = os.path.join(BASE_DIR, "model", "mooa_preprocessor_v4.joblib")
+try:
+    mooa_preprocessor = joblib.load(mooa_preprocessor_path)
+    print(f"✓ MOOA preprocessor loaded from {mooa_preprocessor_path}")
+except Exception as e:
+    mooa_preprocessor = None
+    print(f"⚠ Failed to load MOOA preprocessor from {mooa_preprocessor_path}: {e}")
 
 # Load dataset
 dataset_path = os.path.join(BASE_DIR, "dataset", "super_dataset.csv")
@@ -289,27 +334,39 @@ def check_species_presence(species_name: str, lake_name: str) -> str:
 # FEATURE IMPORTANCE FUNCTION (ONLY ONE, CLEANED)
 # ============================================================================
 
-def get_feature_importance_plots(input_data: pd.DataFrame = None) -> Dict:
-    import shap
+# ============================================================================ #
+# FEATURE IMPORTANCE FIXED
+# ============================================================================ #
 
-    if general_model is None or general_preprocessor is None:
-        raise ValueError("Model or preprocessor not loaded properly.")
+def get_model_and_preprocessor(model_choice: str = "mooa"):
+    if model_choice == "baseline":
+        return baseline_model, baseline_preprocessor
+    elif model_choice == "ooa":
+        return ooa_model, ooa_preprocessor
+    return mooa_model, mooa_preprocessor
+
+def get_feature_importance_plots(input_data: pd.DataFrame = None, model_choice: str = "mooa") -> Dict:
+    import shap
+    model, preprocessor = get_model_and_preprocessor(model_choice)
+    if model is None or preprocessor is None:
+        raise ValueError(f"Model/preprocessor not available for {model_choice}")
 
     try:
-        # Transform input data if provided
-        if input_data is not None:
-            X_processed = general_preprocessor.transform(input_data)
-        else:
-            X_processed = general_preprocessor.transform(super_dataset.head(100))
+        # --- ensure required engineered columns exist ---
+        required_cols = ["wb_ph_range", "wb_temp_range"]
+        if input_data is None:
+            input_data = super_dataset.head(100).copy()
+        for col in required_cols:
+            if col not in input_data.columns:
+                input_data[col] = 0.0
 
-        explainer = shap.TreeExplainer(general_model)
+        X_processed = preprocessor.transform(input_data)
+        explainer = shap.TreeExplainer(model)
         shap_values = explainer.shap_values(X_processed)
-
         if isinstance(shap_values, list):
             shap_values = shap_values[1]
 
-        feature_names = general_preprocessor.get_feature_names_out()
-
+        feature_names = preprocessor.get_feature_names_out()
         core_feature_groups = {
             'pH': ['num__wb_ph_min', 'num__wb_ph_max'],
             'Salinity': ['num__wb_salinity_min', 'num__wb_salinity_max'],
@@ -321,15 +378,17 @@ def get_feature_importance_plots(input_data: pd.DataFrame = None) -> Dict:
 
         grouped_data = []
         for param, feature_list in core_feature_groups.items():
-            feature_indices = [list(feature_names).index(f) for f in feature_list if f in feature_names]
-            if feature_indices:
-                param_shap = np.abs(shap_values[:, feature_indices]).mean()
-                grouped_data.append({
-                    'parameter': param,
-                    'total_importance': float(param_shap),
-                    'feature_count': len(feature_indices),
-                    'features': ', '.join([feature_names[i] for i in feature_indices])
-                })
+            valid = [f for f in feature_list if f in feature_names]
+            if not valid:
+                continue
+            idx = [list(feature_names).index(f) for f in valid]
+            param_shap = np.abs(shap_values[:, idx]).mean()
+            grouped_data.append({
+                "parameter": param,
+                "total_importance": float(param_shap),
+                "feature_count": len(valid),
+                "features": ', '.join(valid)
+            })
 
         grouped_data.sort(key=lambda x: x['total_importance'], reverse=True)
         total_importance = sum(g['total_importance'] for g in grouped_data)
@@ -337,12 +396,12 @@ def get_feature_importance_plots(input_data: pd.DataFrame = None) -> Dict:
             g['percentage'] = (g['total_importance'] / total_importance * 100) if total_importance > 0 else 0
 
         plt.figure(figsize=(8, 5))
-        params = [g['parameter'] for g in grouped_data]
-        importances = [g['total_importance'] for g in grouped_data]
-        plt.barh(params, importances, color='skyblue')
-        plt.xlabel('Mean |SHAP value|')
-        plt.ylabel('Environmental Parameter')
-        plt.title('Environmental Parameter Importance (SHAP)')
+        plt.barh([g['parameter'] for g in grouped_data],
+                 [g['total_importance'] for g in grouped_data],
+                 color='skyblue')
+        plt.xlabel("Mean |SHAP value|")
+        plt.ylabel("Environmental Parameter")
+        plt.title("Environmental Parameter Importance (SHAP)")
         plt.tight_layout()
 
         buf = io.BytesIO()
@@ -351,11 +410,7 @@ def get_feature_importance_plots(input_data: pd.DataFrame = None) -> Dict:
         buf.seek(0)
         img_base64 = base64.b64encode(buf.read()).decode('utf-8')
 
-        return {
-            "aggregated_importance": grouped_data,
-            "plot_base64": img_base64,
-            "plot_format": "png"
-        }
+        return {"aggregated_importance": grouped_data, "plot_base64": img_base64, "plot_format": "png"}
 
     except Exception as e:
         raise RuntimeError(f"SHAP analysis failed: {str(e)}")
@@ -366,56 +421,25 @@ def get_feature_importance_plots(input_data: pd.DataFrame = None) -> Dict:
 # MAIN BACKEND FUNCTIONS
 # ============================================================================
 
-def get_risk_predictions(species_name: str, temperature: float, ph: float, 
-                        salinity: float, do: float, bod: float, turbidity: float) -> Dict:
+def get_risk_predictions(species_name: str, temperature: float, ph: float,
+                        salinity: float, do: float, bod: float, 
+                        turbidity: float, model_choice: str = "mooa") -> Dict:
     """
-    Generate invasion risk predictions for all Luzon lakes.
-    
-    This function:
-    1. Fetches species biological data
-    2. Builds input DataFrame for all 13 lakes
-    3. Engineers derived features required by the preprocessor
-    4. Transforms data and generates raw predictions
-    5. Calculates environmental similarity for each lake
-    6. Adjusts risk scores based on similarity
-    7. Categorizes risk levels
-    8. Checks species presence data
-    
-    Args:
-        species_name (str): Name of the invasive species
-        temperature (float): Water temperature in °C (0-40)
-        ph (float): Water pH level (0-14)
-        salinity (float): Salinity in ppt (0-10)
-        do (float): Dissolved oxygen in mg/L (0-15)
-        bod (float): Biochemical oxygen demand in mg/L (0-20)
-        turbidity (float): Turbidity in NTU (0-500)
-    
-    Returns:
-        dict: Dictionary containing predictions for all lakes with structure:
-            {
-                "predictions": [
-                    {
-                        "lake_name": str,
-                        "region": str,
-                        "latitude": float,
-                        "longitude": float,
-                        "raw_score": float,
-                        "adjusted_score": float,
-                        "risk_level": str,
-                        "similarity": float,
-                        "presence": str
-                    },
-                    ...
-                ],
-                "warning": str (optional, only if max similarity < 0.05)
-            }
+    Get risk predictions using the selected model.
+    Added model_choice parameter to select which model to use.
     """
     try:
-        # Step 1: Fetch species data
+        # Get selected model and preprocessor
+        model, preprocessor = get_model_and_preprocessor(model_choice)
+        
+        if model is None or preprocessor is None:
+            raise ValueError(f"Model or preprocessor not available for choice: {model_choice}")
+
+        # Get species data and build input DataFrame
         species_row = get_species_data(species_name)
         species_dict = species_row.to_dict()
         
-        # Step 2: Build input DataFrame for all lakes
+        # Build input DataFrame for all lakes
         rows = []
         for _, lake in luzon_lakes.iterrows():
             row = {**species_dict}
@@ -444,7 +468,7 @@ def get_risk_predictions(species_name: str, temperature: float, ph: float,
         
         input_df = pd.DataFrame(rows)
         
-        # Step 3: Engineer derived features
+        # Engineer derived features
         input_df["temp_pref_range"] = input_df["temp_pref_max"] - input_df["temp_pref_min"]
         input_df["wb_ph_range"] = input_df["wb_ph_max"] - input_df["wb_ph_min"]
         input_df["wb_temp_range"] = input_df["wb_temp_max"] - input_df["wb_temp_min"]
@@ -455,11 +479,11 @@ def get_risk_predictions(species_name: str, temperature: float, ph: float,
         input_df["fish_ph_pref"] = (input_df["wb_ph_min"] + input_df["wb_ph_max"]) / 2
         input_df["ph_difference"] = abs(input_df["fish_ph_pref"] - input_df["input_ph"])
         
-        # Step 4: Transform and predict
-        X_processed = general_preprocessor.transform(input_df)
-        raw_probabilities = general_model.predict_proba(X_processed)[:, 1]
+        # Transform and predict using selected model
+        X_processed = preprocessor.transform(input_df)
+        raw_probabilities = model.predict_proba(X_processed)[:, 1]
         
-        # Step 5: Calculate environmental similarity
+        # Calculate environmental similarity
         user_env = np.array([ph, salinity, do, bod, turbidity, temperature])
         similarities = []
         
@@ -477,10 +501,10 @@ def get_risk_predictions(species_name: str, temperature: float, ph: float,
         
         similarities = np.array(similarities)
         
-        # Step 6: Adjust risk scores
+        # Adjust risk scores
         adjusted_scores = raw_probabilities * similarities
         
-        # Step 7: Build results
+        # Build results
         predictions = []
         for i, (_, lake) in enumerate(luzon_lakes.iterrows()):
             prediction = {
@@ -499,7 +523,7 @@ def get_risk_predictions(species_name: str, temperature: float, ph: float,
         # Sort by adjusted score (descending)
         predictions.sort(key=lambda x: x["adjusted_score"], reverse=True)
         
-        # Step 8: Check for warning
+        # Check for warning
         result = {"predictions": predictions}
         
         if similarities.max() < 0.05:
@@ -510,11 +534,59 @@ def get_risk_predictions(species_name: str, temperature: float, ph: float,
     except Exception as e:
         return {"error": str(e)}
 
+def build_single_input_row(species: str, temperature: float, ph: float, 
+                          salinity: float, dissolved_oxygen: float, 
+                          bod: float, turbidity: float) -> pd.DataFrame:
+    """
+    Builds a single input row DataFrame for model prediction/interpretation.
+    """
+    try:
+        # Get species data and convert Series to DataFrame
+        species_data = get_species_data(species)
+        if species_data.empty:
+            raise ValueError(f"Species '{species}' not found in database")
+            
+        # Convert Series to DataFrame with a single row
+        species_row = pd.DataFrame([species_data])
 
+        # Create input data dictionary
+        input_data = {
+            "input_temp": temperature,
+            "input_ph": ph,
+            "input_salinity": salinity,
+            "input_do": dissolved_oxygen,
+            "input_bod": bod,
+            "input_turbidity": turbidity
+        }
 
+        # Merge species data with input parameters
+        for col in input_data:
+            species_row[col] = input_data[col]
 
+        # Add derived features
+        species_row["temp_pref_range"] = (
+            species_row.get("temp_pref_max", 30) - species_row.get("temp_pref_min", 20)
+        )
+        species_row["temp_in_pref_range"] = (
+            (species_row["input_temp"] >= species_row.get("temp_pref_min", 20)) &
+            (species_row["input_temp"] <= species_row.get("temp_pref_max", 30))
+        ).astype(int)
 
+        # Handle pH features with fallbacks
+        ph_min = species_row.get("ph_min", species_row.get("pH_min", pd.Series([6.0])))
+        ph_max = species_row.get("ph_max", species_row.get("pH_max", pd.Series([8.0])))
+        species_row["fish_ph_pref"] = (ph_min + ph_max) / 2
+        species_row["ph_difference"] = abs(species_row["fish_ph_pref"] - species_row["input_ph"])
 
+        print("Debug - DataFrame shape:", species_row.shape)
+        print("Debug - DataFrame columns:", species_row.columns.tolist())
+
+        return species_row
+
+    except Exception as e:
+        print(f"Error building input row: {str(e)}")
+        print(f"Species data type: {type(species_data)}")
+        raise
 
 # ============================================================================
 # UTILITY FUNCTIONS

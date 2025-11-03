@@ -16,6 +16,7 @@ import pandas as pd
 import base64
 import io
 import matplotlib.pyplot as plt
+import json
 
 # Add parent directory to path to import backend
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -23,6 +24,31 @@ super_dataset_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "d
 super_dataset = pd.read_csv(super_dataset_path)
 
 from backend import backend
+
+def _parse_request_json():
+    """
+    Robust JSON/form parsing helper used by endpoints.
+    Returns: (data_dict, None) on success, or (None, (error_message, status_code)) on failure.
+    """
+    if request.is_json:
+        try:
+            return request.get_json(), None
+        except Exception as e:
+            return None, (f"Malformed JSON body: {e}", 400)
+
+    # form-encoded fallback
+    if request.form and len(request.form) > 0:
+        return request.form.to_dict(), None
+
+    # raw body fallback (may be JSON without header)
+    raw = request.get_data(as_text=True)
+    if raw:
+        try:
+            return json.loads(raw), None
+        except Exception as e:
+            return None, (f"Invalid request body (not JSON): {e}", 400)
+
+    return None, ("Empty request body", 400)
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend integration
@@ -161,46 +187,27 @@ def predict_invasion():
         "warning": "..." (optional)
     }
     """
+    data, err = _parse_request_json()
+    if err:
+        msg, status = err
+        return jsonify({"success": False, "error": msg}), status
+
     try:
-        data = request.get_json()
-        
-        # Validate required fields
-        required_fields = ['species', 'temperature', 'ph', 'salinity', 
-                          'dissolved_oxygen', 'bod', 'turbidity']
-        for field in required_fields:
-            if field not in data:
-                return jsonify({
-                    "success": False,
-                    "error": f"Missing required field: {field}"
-                }), 400
-        
-        # Call backend function
-        result = backend.get_risk_predictions(
-            species_name=data['species'],
-            temperature=float(data['temperature']),
-            ph=float(data['ph']),
-            salinity=float(data['salinity']),
-            do=float(data['dissolved_oxygen']),
-            bod=float(data['bod']),
-            turbidity=float(data['turbidity'])
-        )
-        
-        if "error" in result:
-            return jsonify({
-                "success": False,
-                "error": result["error"]
-            }), 400
-        
-        return jsonify({
-            "success": True,
-            **result
-        })
-        
+        species = data.get('species', '')
+        temperature = float(data.get('temperature', 0))
+        ph = float(data.get('ph', 0))
+        salinity = float(data.get('salinity', 0))
+        dissolved_oxygen = float(data.get('dissolved_oxygen', 0))
+        bod = float(data.get('bod', 0))
+        turbidity = float(data.get('turbidity', 0))
+        model_choice = data.get('model_choice', data.get('model', 'xgooa'))
+
+        res = backend.get_risk_predictions(species, temperature, ph, salinity,
+                                           dissolved_oxygen, bod, turbidity,
+                                           model_choice=model_choice)
+        return jsonify({"success": True, "data": res})
     except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 @app.route('/api/geojson', methods=['POST'])
@@ -314,142 +321,100 @@ def get_most_contributing():
 # INTERPRETATION ENDPOINTS
 # ============================================================================
 @app.route('/api/interpretation/feature-importance', methods=['POST'])
-def get_feature_importance():
+def api_feature_importance():
+    data, err = _parse_request_json()
+    if err:
+        msg, status = err
+        return jsonify({"success": False, "error": msg}), status
+
     try:
-        data = request.get_json()
-        species_name = data.get('species')
-        temperature = float(data['temperature'])
-        ph = float(data['ph'])
-        salinity = float(data['salinity'])
-        dissolved_oxygen = float(data['dissolved_oxygen'])
-        bod = float(data['bod'])
-        turbidity = float(data['turbidity'])
+        model_choice = data.get('model_choice', data.get('model', 'xgooa'))
 
-        # Get the species row as a dict
-        species_row = backend.get_species_data(species_name)
-        species_dict = species_row.to_dict()
+        # Accept either full input_row or species+env values
+        input_df = None
+        if 'input_row' in data and isinstance(data['input_row'], dict):
+            input_df = pd.DataFrame([data['input_row']])
+        elif all(k in data for k in ('species','temperature','ph','salinity','dissolved_oxygen','bod','turbidity')):
+            input_df = backend.build_single_input_row(
+                data['species'],
+                float(data['temperature']),
+                float(data['ph']),
+                float(data['salinity']),
+                float(data['dissolved_oxygen']),
+                float(data['bod']),
+                float(data['turbidity'])
+            )
+        else:
+            return jsonify({"success": False, "error": "Missing required fields for interpretation (species+env or input_row)"}), 400
 
-        # Build a single input row just like in get_risk_predictions
-        row = {**species_dict}
-        row.update({
-            "waterbody_name": "Generic",
-            "wb_ph_min": ph - 0.5,
-            "wb_ph_max": ph + 0.5,
-            "wb_salinity_min": max(0, salinity - 1),
-            "wb_salinity_max": salinity + 1,
-            "wb_do_min": max(0, dissolved_oxygen - 1),
-            "wb_do_max": dissolved_oxygen + 1,
-            "wb_bod_min": max(0, bod - 1),
-            "wb_bod_max": bod + 1,
-            "wb_turbidity_min": max(0, turbidity - 10),
-            "wb_turbidity_max": turbidity + 10,
-            "wb_temp_min": temperature - 2,
-            "wb_temp_max": temperature + 2,
-            "input_temp": temperature,
-            "input_ph": ph,
-            "input_salinity": salinity,
-            "input_do": dissolved_oxygen,
-            "input_bod": bod,
-            "input_turbidity": turbidity
-        })
-
-        input_df = pd.DataFrame([row])
-
-        # Engineer derived features (copy this logic from backend.py)
-        input_df["temp_pref_range"] = input_df["temp_pref_max"] - input_df["temp_pref_min"]
-        input_df["wb_ph_range"] = input_df["wb_ph_max"] - input_df["wb_ph_min"]
-        input_df["wb_temp_range"] = input_df["wb_temp_max"] - input_df["wb_temp_min"]
-        input_df["temp_in_pref_range"] = (
-            (input_df["input_temp"] >= input_df["temp_pref_min"]) & 
-            (input_df["input_temp"] <= input_df["temp_pref_max"])
-        ).astype(int)
-        input_df["fish_ph_pref"] = (input_df["wb_ph_min"] + input_df["wb_ph_max"]) / 2
-        input_df["ph_difference"] = abs(input_df["fish_ph_pref"] - input_df["input_ph"])
-
-        # Now call the feature importance function
-        importance_data = backend.get_feature_importance_plots(input_df)
-
-        return jsonify({
-            'success': True,
-            'data': importance_data
-        })
-
+        importance = backend.get_feature_importance_plots(input_df, model_choice=model_choice)
+        return jsonify({"success": True, "data": importance})
     except Exception as e:
-        print(f"Error in feature importance: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': f"SHAP analysis failed: {str(e)}"
-        }), 500
+        return jsonify({"success": False, "error": str(e)}), 500
 
 # ============================================================================
 # RISK SCORES ENDPOINTS
 # ============================================================================
 
 @app.route('/api/risk-scores', methods=['POST'])
-def get_risk_scores():
-    """
-    Get risk scores table data.
-    
-    Expected JSON body:
-    {
-        "species": "Anabas testudineus",
-        "temperature": 27.0,
-        "ph": 7.5,
-        "salinity": 0.5,
-        "dissolved_oxygen": 6.0,
-        "bod": 2.0,
-        "turbidity": 10.0
-    }
-    
-    Returns table data for the Risk Scores tab.
-    """
+def api_risk_scores():
+    data, err = _parse_request_json()
+    if err:
+        msg, status = err
+        return jsonify({"success": False, "error": msg}), status
+
     try:
-        data = request.get_json()
-        
-        # Validate required fields
-        required_fields = ['species', 'temperature', 'ph', 'salinity', 
-                          'dissolved_oxygen', 'bod', 'turbidity']
-        for field in required_fields:
-            if field not in data:
-                return jsonify({
-                    "success": False,
-                    "error": f"Missing required field: {field}"
-                }), 400
-        
-        # Get predictions
-        result = backend.get_risk_predictions(
-            species_name=data['species'],
-            temperature=float(data['temperature']),
-            ph=float(data['ph']),
-            salinity=float(data['salinity']),
-            do=float(data['dissolved_oxygen']),
-            bod=float(data['bod']),
-            turbidity=float(data['turbidity'])
+        species = data.get('species', '')
+        temperature = float(data.get('temperature', 0))
+        ph = float(data.get('ph', 0))
+        salinity = float(data.get('salinity', 0))
+        dissolved_oxygen = float(data.get('dissolved_oxygen', 0))
+        bod = float(data.get('bod', 0))
+        turbidity = float(data.get('turbidity', 0))
+        model_choice = data.get('model_choice', data.get('model', 'xgooa'))
+
+        results = backend.get_risk_predictions(
+            species, temperature, ph, salinity, dissolved_oxygen, bod, turbidity,
+            model_choice=model_choice
         )
-        
-        if "error" in result:
+
+        table_data = []
+        for pred in results.get('predictions', []):
+            table_data.append({
+                "lake": pred.get("lake_name"),
+                "region": pred.get("region"),
+                "score": pred.get("adjusted_score"),
+                "presence": pred.get("presence")
+            })
+        return jsonify({"success": True, "data": table_data})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ============================================================================
+# PRESENCE ENDPOINTS
+# ============================================================================
+
+@app.route('/api/check-presence', methods=['GET'])
+def check_presence():
+    """Check if a species is present in any lake."""
+    try:
+        species = request.args.get('species')
+        if not species:
             return jsonify({
                 "success": False,
-                "error": result["error"]
+                "error": "Species parameter is required"
             }), 400
-        
-        # Format for table
-        table_data = []
-        for pred in result["predictions"]:
-            table_data.append({
-                "lake": pred["lake_name"],
-                "region": pred["region"],
-                "score": pred["adjusted_score"],
-                "risk_level": pred["risk_level"],
-                "presence": pred["presence"]
-            })
-        
+
+        presence_data = {}
+        for lake in backend.LUZON_LAKES:
+            presence = backend.check_species_presence(species, lake)
+            presence_data[lake] = presence
+
         return jsonify({
             "success": True,
-            "count": len(table_data),
-            "data": table_data
+            "data": presence_data
         })
-        
     except Exception as e:
         return jsonify({
             "success": False,
@@ -457,6 +422,7 @@ def get_risk_scores():
         }), 500
 
 
+#===========================================================================
 # ============================================================================
 # ERROR HANDLERS
 # ============================================================================
@@ -498,6 +464,7 @@ if __name__ == '__main__':
     print("  GET  /api/overview/most-contributing          - Most contributing feature")
     print("  GET  /api/interpretation/feature-importance   - Feature importance analysis")
     print("  POST /api/risk-scores                         - Risk scores table")
+    print("  GET  /api/check-presence                      - Check species presence in lakes")
     print("\n" + "=" * 70)
     print("Server running on http://localhost:5000")
     print("=" * 70 + "\n")
