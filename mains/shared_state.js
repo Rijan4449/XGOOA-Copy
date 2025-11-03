@@ -3,10 +3,10 @@
 
 const SharedState = {
     // Save current form values to localStorage
-    saveFormInputs: function() {
+    saveFormInputs: function () {
         const specieSelect = document.getElementById('specie');
         const selectedOption = specieSelect?.options[specieSelect.selectedIndex];
-        
+
         const state = {
             temperature: document.getElementById('temperature')?.value || '27',
             water_ph: document.getElementById('water_ph')?.value || '7.5',
@@ -25,9 +25,9 @@ const SharedState = {
     },
 
     // Save prediction results to localStorage
-    savePredictionResults: function(geojsonData) {
+    savePredictionResults: function (geojsonData) {
         if (!geojsonData) return;
-        
+
         const predictionState = {
             geojson: geojsonData,
             timestamp: new Date().toISOString()
@@ -37,7 +37,7 @@ const SharedState = {
     },
 
     // Load form values from localStorage
-    loadFormInputs: function() {
+    loadFormInputs: function () {
         const saved = localStorage.getItem('xgooa_form_state');
         if (!saved) {
             // Return default values - ALL SLIDERS START AT ZERO
@@ -58,29 +58,29 @@ const SharedState = {
     },
 
     // Load prediction results from localStorage
-    loadPredictionResults: function() {
+    loadPredictionResults: function () {
         const saved = localStorage.getItem('xgooa_prediction_results');
         if (!saved) return null;
-        
+
         const data = JSON.parse(saved);
         // Check if data is less than 1 hour old
         const timestamp = new Date(data.timestamp);
         const now = new Date();
         const hoursDiff = (now - timestamp) / (1000 * 60 * 60);
-        
+
         if (hoursDiff > 1) {
             // Data is stale, clear it
             localStorage.removeItem('xgooa_prediction_results');
             return null;
         }
-        
+
         return data.geojson;
     },
 
     // Apply loaded state to form sliders
-    applyFormInputs: function() {
+    applyFormInputs: function () {
         const state = this.loadFormInputs();
-        
+
         // Apply slider values
         ['temperature', 'water_ph', 'salinity', 'dissolved_oxygen', 'bod', 'turbidity'].forEach(id => {
             const slider = document.getElementById(id);
@@ -95,9 +95,9 @@ const SharedState = {
     },
 
     // Restore species selection after Select2 is initialized
-    restoreSpeciesSelection: function($specieSelect) {
+    restoreSpeciesSelection: function ($specieSelect) {
         const state = this.loadFormInputs();
-        
+
         if (!state.specie_value || !state.specie_sci) {
             console.log('No saved species to restore');
             return;
@@ -106,8 +106,8 @@ const SharedState = {
         // Find the option with matching scientific name
         const options = $specieSelect.find('option');
         let matchFound = false;
-        
-        options.each(function() {
+
+        options.each(function () {
             const $option = $(this);
             if ($option.attr('data-sci') === state.specie_sci) {
                 $specieSelect.val($option.val()).trigger('change');
@@ -123,7 +123,7 @@ const SharedState = {
     },
 
     // Get species scientific name for API call
-    getSpeciesName: function() {
+    getSpeciesName: function () {
         const select = document.getElementById('specie');
         if (!select || !select.selectedOptions || !select.selectedOptions[0]) {
             return '';
@@ -132,26 +132,26 @@ const SharedState = {
     },
 
     // Check if we have valid prediction data
-    hasPredictionData: function() {
+    hasPredictionData: function () {
         const results = this.loadPredictionResults();
         const formState = this.loadFormInputs();
         return results !== null && formState.specie_sci !== '';
     },
 
     // Clear all saved state
-    clear: function() {
+    clear: function () {
         localStorage.removeItem('xgooa_form_state');
         localStorage.removeItem('xgooa_prediction_results');
         console.log('All state cleared');
     },
 
     // Reset form to default values and clear all data
-    reset: function() {
+    reset: function () {
         console.log('Starting reset process...');
-        
+
         // Clear localStorage FIRST
         this.clear();
-        
+
         // Reset all sliders to ZERO
         const defaults = {
             temperature: '0',
@@ -161,35 +161,35 @@ const SharedState = {
             bod: '0',
             turbidity: '0'
         };
-        
+
         // Reset each slider with proper event triggering
         Object.keys(defaults).forEach(id => {
             const slider = document.getElementById(id);
             const display = document.getElementById(id + '_value');
-            
+
             if (slider) {
                 // Set the value to ZERO
                 slider.value = defaults[id];
-                
+
                 // Update display to show ZERO
                 if (display) {
                     display.textContent = defaults[id];
                 }
-                
+
                 // Trigger input event to ensure any listeners are notified
                 const inputEvent = new Event('input', { bubbles: true });
                 slider.dispatchEvent(inputEvent);
-                
+
                 // Trigger change event as well
                 const changeEvent = new Event('change', { bubbles: true });
                 slider.dispatchEvent(changeEvent);
-                
+
                 console.log(`Reset ${id} to ${defaults[id]}`);
             } else {
                 console.warn(`Slider not found: ${id}`);
             }
         });
-        
+
         // Reset species dropdown (using jQuery if available)
         const specieSelect = document.getElementById('specie');
         if (specieSelect) {
@@ -199,40 +199,40 @@ const SharedState = {
                 specieSelect.selectedIndex = 0;
             }
         }
-        
+
         // Reset species description
         const noteEl = document.getElementById('species-note');
         if (noteEl) {
             noteEl.innerHTML = '<em class="opacity-75">Select a species to see its description...</em>';
         }
-        
+
         console.log('Form reset to ZERO - complete');
         return true;
     },
 
     // Show confirmation dialog and reset if confirmed
-    confirmAndReset: function() {
+    confirmAndReset: function () {
         const confirmed = confirm(
             'Are you sure you want to start a new prediction?\n\n' +
             'This will clear all current inputs and results.'
         );
-        
+
         if (confirmed) {
             console.log('User confirmed reset');
-            
+
             // Step 1: Clear localStorage FIRST and wait for it to complete
             this.clear();
-            
+
             // Step 2: Force localStorage to flush by reading it back
             const verifyCleared = localStorage.getItem('xgooa_form_state');
             console.log('Verification - localStorage cleared:', verifyCleared === null);
-            
+
             // Step 3: Reset form visually (sliders, dropdowns, etc.)
             this.resetFormVisuals();
-            
+
             // Step 4: Show success notification
             this.showResetNotification();
-            
+
             // Step 5: Wait longer before reload to ensure everything is processed
             // This gives time for:
             // - localStorage to fully clear
@@ -245,14 +245,14 @@ const SharedState = {
                 window.location.reload(true);
             }, 1200); // Increased from 800ms to 1200ms for better reliability
         }
-        
+
         return confirmed;
     },
 
     // Reset form visuals without clearing localStorage (used internally)
-    resetFormVisuals: function() {
+    resetFormVisuals: function () {
         console.log('Resetting form visuals to ZERO...');
-        
+
         // Reset all sliders to ZERO
         const defaults = {
             temperature: '0',
@@ -262,33 +262,33 @@ const SharedState = {
             bod: '0',
             turbidity: '0'
         };
-        
+
         // Reset each slider with proper event triggering
         Object.keys(defaults).forEach(id => {
             const slider = document.getElementById(id);
             const display = document.getElementById(id + '_value');
-            
+
             if (slider) {
                 // Set the value to ZERO
                 slider.value = defaults[id];
-                
+
                 // Update display to show ZERO
                 if (display) {
                     display.textContent = defaults[id];
                 }
-                
+
                 // Trigger input event to ensure any listeners are notified
                 const inputEvent = new Event('input', { bubbles: true });
                 slider.dispatchEvent(inputEvent);
-                
+
                 // Trigger change event as well
                 const changeEvent = new Event('change', { bubbles: true });
                 slider.dispatchEvent(changeEvent);
-                
+
                 console.log(`Visual reset: ${id} = ${defaults[id]}`);
             }
         });
-        
+
         // Reset species dropdown
         const specieSelect = document.getElementById('specie');
         if (specieSelect) {
@@ -298,18 +298,18 @@ const SharedState = {
                 specieSelect.selectedIndex = 0;
             }
         }
-        
+
         // Reset species description
         const noteEl = document.getElementById('species-note');
         if (noteEl) {
             noteEl.innerHTML = '<em class="opacity-75">Select a species to see its description...</em>';
         }
-        
+
         console.log('Form visuals reset to ZERO - complete');
     },
 
     // Show temporary success notification
-    showResetNotification: function() {
+    showResetNotification: function () {
         // Create notification element
         const notification = document.createElement('div');
         notification.className = 'reset-notification';
@@ -330,7 +330,7 @@ const SharedState = {
             font-weight: 500;
             animation: slideIn 0.3s ease-out;
         `;
-        
+
         // Add animation
         const style = document.createElement('style');
         style.textContent = `
@@ -340,9 +340,9 @@ const SharedState = {
             }
         `;
         document.head.appendChild(style);
-        
+
         document.body.appendChild(notification);
-        
+
         // Remove after delay
         setTimeout(() => {
             notification.style.animation = 'slideIn 0.3s ease-out reverse';
@@ -352,7 +352,7 @@ const SharedState = {
 };
 
 // Auto-save on form changes
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Apply saved form inputs immediately
     SharedState.applyFormInputs();
 
@@ -372,8 +372,34 @@ document.addEventListener('DOMContentLoaded', function() {
     // Save on species change (will be attached after Select2 init)
     const specieSelect = document.getElementById('specie');
     if (specieSelect) {
-        $(specieSelect).on('change', function() {
+        $(specieSelect).on('change', function () {
             SharedState.saveFormInputs();
+        });
+    }
+});
+
+// --- Save & Load Selected Model --- //
+function saveModelChoice(selectedModel) {
+    if (!selectedModel) return;
+    localStorage.setItem('invasive_model_choice', selectedModel);
+    console.log('Model choice saved:', selectedModel);
+}
+
+function loadModelChoice() {
+    return localStorage.getItem('invasive_model_choice') || 'xgooa'; // default
+}
+
+// --- Initialize on Page Load --- //
+document.addEventListener('DOMContentLoaded', function () {
+    const modelSelect = document.getElementById('model_choice');
+    if (modelSelect) {
+        // Restore saved choice
+        const savedModel = loadModelChoice();
+        modelSelect.value = savedModel;
+
+        // Save when user changes
+        modelSelect.addEventListener('change', function () {
+            saveModelChoice(this.value);
         });
     }
 });
