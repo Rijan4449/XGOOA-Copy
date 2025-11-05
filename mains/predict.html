@@ -142,6 +142,34 @@
       height: 36px;
       right: 8px;
     }
+
+    /* Tuning Statistics Styles */
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid #e9ecef;
+    }
+    
+    .stat-row:last-child {
+      border-bottom: none;
+    }
+    
+    .stat-label {
+      font-weight: 500;
+      color: #495057;
+      font-size: 0.9rem;
+    }
+    
+    .stat-value {
+      font-weight: 600;
+      color: #0d3b66;
+      font-size: 0.9rem;
+    }
+    
+    .text-brand {
+      color: #0d3b66;
+    }
   </style>
 </head>
 
@@ -264,6 +292,16 @@
             <small class="text-muted d-block mb-4">
               Choose which model to run for the prediction.
             </small>
+
+            <!-- Tuning Statistics Section -->
+            <div id="tuning-stats" class="mt-3 p-3 bg-light rounded-3 border">
+              <h6 class="mb-3 text-brand fw-semibold">
+                <i class="bi bi-graph-up me-2"></i>Model Tuning Statistics
+              </h6>
+              <div id="tuning-stats-content">
+                <!-- Stats will be populated based on selected model -->
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -337,6 +375,63 @@
   <script src="shared_state.js"></script>
 
   <script>
+    // Model tuning statistics data
+    const MODEL_TUNING_STATS = {
+      'xgboost': {
+        name: 'Baseline',
+        stats: {
+          'Total tuning time': '35.10 seconds (0.58 minutes)',
+          'Number of iterations/folds': '5',
+          'Time per iteration': '7.02 seconds',
+          'Validation score mean': '0.8129',
+          'Validation score variance': '0.000229'
+        }
+      },
+      'mooa': {
+        name: 'Osprey Optimization Algorithm (OOA)',
+        stats: {
+          'Total tuning time': '1027.75 seconds (17.13 minutes)',
+          'Number of iterations/folds': '15',
+          'Time per iteration': '68.52 seconds',
+          'Validation score mean': '0.8243',
+          'Validation score variance': '0.000141'
+        }
+      },
+      'xgooa': {
+        name: 'Proposed Model (XGOOA)',
+        stats: {
+          'Total tuning time': '18902.62 seconds (315.04 minutes)',
+          'Number of iterations': '20',
+          'Time per iteration': '945.13 seconds',
+          'Validation score mean': '0.8189',
+          'Validation score variance': '0.000135'
+        }
+      }
+    };
+
+    // Function to render tuning statistics
+    function renderTuningStats(modelValue) {
+      const statsContent = document.getElementById('tuning-stats-content');
+      const modelData = MODEL_TUNING_STATS[modelValue];
+      
+      if (!modelData) {
+        statsContent.innerHTML = '<p class="text-muted mb-0 small">No statistics available for this model.</p>';
+        return;
+      }
+      
+      let html = '';
+      for (const [label, value] of Object.entries(modelData.stats)) {
+        html += `
+          <div class="stat-row">
+            <span class="stat-label">${label}:</span>
+            <span class="stat-value">${value}</span>
+          </div>
+        `;
+      }
+      
+      statsContent.innerHTML = html;
+    }
+
     // Tooltip activation script
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.forEach(function (tooltipTriggerEl) {
@@ -496,6 +591,18 @@
     }
 
     $(document).ready(function () {
+      // Initialize tuning stats display
+      const modelSelect = document.getElementById('model_choice');
+      if (modelSelect) {
+        // Show initial stats for default selected model
+        renderTuningStats(modelSelect.value);
+        
+        // Update stats when model selection changes
+        modelSelect.addEventListener('change', function() {
+          renderTuningStats(this.value);
+        });
+      }
+
       // Sliders live values
       ["temperature", "water_ph", "salinity", "dissolved_oxygen", "bod", "turbidity"].forEach(id => {
         const slider = document.getElementById(id);
@@ -548,9 +655,7 @@
         setTimeout(() => map.invalidateSize(), 200);
       });
 
-      // ======================
       // Species CSV integration
-      // ======================
       const CSV_URL = "../assets/fish_description.csv";
       const $specie = $('#specie');
       const noteEl = document.getElementById("species-note");
@@ -574,7 +679,6 @@
         header: true,
         skipEmptyLines: true,
         complete: function (results) {
-          // Build options from CSV
           const items = (results?.data || [])
             .map((r, idx) => ({
               sciName: (r["Species"] || "").toString().trim(),
@@ -584,10 +688,8 @@
             }))
             .filter(r => r.sciName || r.commonName);
 
-          // Always include a blank placeholder
           $specie.empty().append(`<option></option>`);
 
-          // Fallback if CSV is missing/empty
           if (!items.length) {
             const fb = { commonName: "Clown Knife Fish", sciName: "Chitala ornata", description: "Adaptable, predatory; potential risk to native and economic species." };
             $specie.append(
@@ -612,7 +714,6 @@
             });
           }
 
-          // Initialize Select2 with the same templates as interpretation.html
           $specie.select2({
             placeholder: "Select a species",
             allowClear: true,
@@ -634,12 +735,10 @@
               const $el = $(option.element);
               const common = $el.data("common") || "(No common name)";
               const sci = $el.data("sci") || "";
-              // IMPORTANT: return plain text so it shows in the field
               return `${common}${sci ? ` (${sci})` : ""}`;
             }
           });
 
-          // Update description on change
           $specie.on("change", function () {
             const opt = this.selectedOptions && this.selectedOptions[0];
             if (!opt) return renderDescription(null);
@@ -650,10 +749,8 @@
             });
           });
 
-          // Restore saved species selection
           SharedState.restoreSpeciesSelection($specie);
 
-          // Auto-load previous prediction if available
           const savedPrediction = SharedState.loadPredictionResults();
           if (savedPrediction && SharedState.hasPredictionData()) {
             console.log('Previous prediction data found, auto-loading map...');
